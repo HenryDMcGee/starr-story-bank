@@ -63,6 +63,11 @@ header.top { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end; j
 .sand-title p { margin: 0; font-family: var(--f-sand); font-size: 22px; color: #94784b; text-shadow: 1px 1px 0 rgba(255,244,214,.7), -1px -1px 0 rgba(90,64,28,.35); }
 .buoy { min-height: 48px; padding: 12px 26px; border: 3px solid #fff3e8; border-radius: 999px; background: var(--accent); color: var(--on-accent); font-weight: 600; font-size: 15px; box-shadow: 8px 12px 14px rgba(80,55,20,.35), inset 0 -4px 0 rgba(0,0,0,.12); transform: rotate(2deg); }
 .buoy:hover { filter: brightness(1.07); }
+.buoy.small { min-height: 44px; padding: 10px 20px; font-size: 14px; transform: rotate(-1.5deg); }
+.sec-head { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; justify-content: space-between; margin-top: 28px; }
+.sand-sub { transform: rotate(-.8deg); }
+.sand-h2 { font-family: var(--f-sand); font-weight: 700; font-size: clamp(30px, 5vw, 44px); line-height: 1.05; color: var(--sand-ink); text-shadow: 2px 2px 0 rgba(255,244,214,.75), -1px -2px 1px rgba(90,64,28,.45); }
+.sand-sub p { margin: 2px 0 0; font-family: var(--f-sand); font-size: 19px; color: #94784b; text-shadow: 1px 1px 0 rgba(255,244,214,.7), -1px -1px 0 rgba(90,64,28,.35); }
 
 .notice { padding: 10px 14px; border-radius: 10px; background: var(--warn-soft); color: var(--ink); border: 1px solid var(--rope); }
 
@@ -124,6 +129,12 @@ header.top { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end; j
 .c-status.Practiced { color: var(--deep); }
 .none { color: var(--muted); }
 .empty-row td { text-align: center; color: var(--muted); padding: 36px 16px; }
+.story-table tr.pitch { cursor: pointer; }
+.story-table tr.pitch:hover td { background: #f7f9fa; }
+.pitch-table th:first-child { width: 22%; }
+.pitch-table th:nth-child(2) { width: 40%; }
+.c-name { font-weight: 600; }
+.muted-cell { color: var(--muted); font-size: 13px; white-space: nowrap; }
 @media (max-width: 640px) {
   .story-table { min-width: 0; }
   .story-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
@@ -142,6 +153,15 @@ header.top { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end; j
   .story-table tr.story td:nth-child(6)::before { content: "Status"; }
   .story-table tr.empty-row { display: block; }
   .story-table tr.empty-row td { padding: 28px 16px; }
+  .story-table tr.pitch td:nth-child(1), .story-table tr.pitch td:nth-child(2) { grid-column: 1 / -1; }
+  .story-table tr.pitch td:nth-child(1) { font-size: 16px; }
+  .story-table tr.pitch td::before { display: block; font-size: 12px; font-weight: 600; color: var(--ink-2); margin-bottom: 2px; }
+  .story-table tr.pitch td:nth-child(1)::before { content: "Version"; }
+  .story-table tr.pitch td:nth-child(2)::before { content: "Opening line"; }
+  .story-table tr.pitch td:nth-child(3)::before { content: "Target"; }
+  .story-table tr.pitch td:nth-child(4)::before { content: "Length"; }
+  .story-table tr.pitch td:nth-child(5)::before { content: "Status"; }
+  .story-table tr.pitch td:nth-child(6)::before { content: "Updated"; }
 }
 
 /* Controls on the seafloor */
@@ -233,6 +253,10 @@ header.top { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end; j
 .assist p { margin: 0; font-size: 12px; color: var(--ink-2); }
 .msg { font-size: 13px; color: var(--muted); }
 .msg.err { color: var(--danger); }
+.pitch-preview { border: 1px solid var(--line); border-radius: 10px; background: var(--pale); padding: 14px; display: grid; gap: 8px; }
+.pp-meta { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; font-weight: 600; color: var(--ink-2); }
+.pp-meta .over { color: #8a4510; }
+.pitch-preview p { margin: 0; font-size: 15px; line-height: 1.6; white-space: pre-wrap; }
 .practice { border-top: 1px solid var(--line); padding-top: 16px; display: grid; gap: 12px; }
 .practice h3 { font-size: 16px; }
 .practice-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
@@ -407,6 +431,36 @@ header.top { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end; j
         </div>
       </div>
     </div>
+
+    <section class="pitch-sec" aria-labelledby="pitchTitle">
+      <div class="sec-head">
+        <div class="sand-sub">
+          <h2 class="sand-h2" id="pitchTitle">Tell me about yourself</h2>
+          <p>your opening answer, in three parts</p>
+        </div>
+        <button class="buoy small lift" id="newPitchBtn" type="button">+ New pitch</button>
+      </div>
+      <div class="board-wrap" style="margin-top: 22px;">
+        <svg class="mound" aria-hidden="true" viewBox="0 0 1000 400" preserveAspectRatio="none">
+          <path d="M36 214 C24 118 118 36 300 26 C482 14 724 18 884 46 C978 66 998 170 984 254 C968 344 862 390 640 394 C418 400 176 396 86 344 C40 316 42 262 36 214 Z" fill="url(#moundFill)"></path>
+          <path d="M36 214 C24 118 118 36 300 26 C482 14 724 18 884 46 C978 66 998 170 984 254 C968 344 862 390 640 394 C418 400 176 396 86 344 C40 316 42 262 36 214 Z" fill="url(#moundShade)"></path>
+          <g clip-path="url(#moundClip)">
+            <rect width="1000" height="400" fill="#000" filter="url(#grainCoarse)" opacity="0.35"></rect>
+            <rect width="1000" height="400" fill="#000" filter="url(#grainDark)" opacity="0.55"></rect>
+            <rect width="1000" height="400" fill="#000" filter="url(#grainRust)" opacity="0.5"></rect>
+            <rect width="1000" height="400" fill="#000" filter="url(#grainLight)" opacity="0.8"></rect>
+          </g>
+        </svg>
+        <div class="board">
+          <div class="board-scroll">
+            <table class="story-table pitch-table">
+              <thead><tr><th>Version</th><th>Opening line</th><th>Target</th><th>Length</th><th>Status</th><th>Updated</th></tr></thead>
+              <tbody id="pitchRows"><tr class="empty-row"><td colspan="6">Loading your pitches…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
 
   <div class="sea-controls">
@@ -521,6 +575,51 @@ header.top { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end; j
     <span class="msg" id="formMsg"></span>
     <span class="spacer"></span>
     <button class="btn danger" type="button" id="delBtn" hidden>Delete</button>
+  </div>
+</aside>
+<div class="scrim" id="pScrim" hidden></div>
+<aside class="drawer" id="pDrawer" hidden aria-labelledby="pDrawerTitle" role="dialog" aria-modal="true">
+  <div class="drawer-head">
+    <h2 id="pDrawerTitle">New pitch</h2>
+    <button class="btn ghost" id="pCloseBtn" type="button" aria-label="Close pitch editor">Close</button>
+  </div>
+  <div class="drawer-body">
+    <form id="pForm" autocomplete="off" style="display:grid;gap:16px">
+      <div class="field"><label for="pName">Version name</label><input id="pName" placeholder="For example, General PM, 60 seconds"></div>
+      <div class="grid3">
+        <div class="field"><label for="pTarget">Target company or role</label><input id="pTarget" placeholder="Any, or e.g. Google PM"></div>
+        <div class="field"><label for="pLen">Target length</label><select id="pLen"><option value="30">30 seconds</option><option value="60" selected>60 seconds</option><option value="90">90 seconds</option><option value="120">2 minutes</option></select></div>
+        <div class="field"><label for="pStat">Status</label><select id="pStat"><option>Draft</option><option>Ready</option><option>Practiced</option></select></div>
+      </div>
+      <div class="assist" id="pAssist" hidden>
+        <div class="field">
+          <label for="pNotes">Notes for Claude</label>
+          <textarea id="pNotes" rows="3" placeholder="What you want them to remember about you, the experiences to mention, and why this company."></textarea>
+        </div>
+        <div class="row">
+          <button class="btn primary" type="button" id="pDraftBtn">Draft with Claude</button>
+          <button class="btn" type="button" id="pStopBtn" hidden>Stop</button>
+          <span class="msg" id="pDraftMsg"></span>
+        </div>
+        <p>Claude writes the three parts to fit your target length, using only what's in your notes and fields. Missing details become [placeholders].</p>
+      </div>
+      <div class="starr">
+        <div class="field"><label for="p_present"><b>1</b>Present <span class="hint-txt">who you are now and what you're focused on</span></label><textarea id="p_present"></textarea></div>
+        <div class="field"><label for="p_past"><b>2</b>Past <span class="hint-txt">the path that led here, one or two key experiences</span></label><textarea id="p_past" rows="5"></textarea></div>
+        <div class="field"><label for="p_future"><b>3</b>Future <span class="hint-txt">why this role, why this company, why now</span></label><textarea id="p_future"></textarea></div>
+      </div>
+      <div class="pitch-preview">
+        <div class="pp-meta" id="pMeta"></div>
+        <p id="pPreview"></p>
+      </div>
+    </form>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn primary" type="button" id="pSaveBtn">Save pitch</button>
+    <button class="btn" type="button" id="pCopyBtn">Copy pitch</button>
+    <span class="msg" id="pFormMsg"></span>
+    <span class="spacer"></span>
+    <button class="btn danger" type="button" id="pDelBtn" hidden>Delete</button>
   </div>
 </aside>
 <div class="toast" id="toast" hidden></div>
@@ -666,6 +765,7 @@ function render() {
     tr.append(el("td", "c-status " + status, status));
     rows.append(tr);
   }
+  renderPitches();
 }
 ["q", "fComp", "fStatus", "sortBy"].forEach(id => $(id).addEventListener("input", render));
 
@@ -708,7 +808,11 @@ function closeEditor() {
 $("newBtn").onclick = () => openEditor(null);
 $("closeBtn").onclick = closeEditor;
 $("scrim").onclick = closeEditor;
-document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("drawer").hidden) closeEditor(); });
+document.addEventListener("keydown", e => {
+  if (e.key !== "Escape") return;
+  if (!$("drawer").hidden) closeEditor();
+  else if (!$("pDrawer").hidden) closePitch();
+});
 $("form").addEventListener("submit", e => e.preventDefault());
 function formMsg(m, err) { $("formMsg").textContent = m; $("formMsg").className = "msg" + (err ? " err" : ""); }
 
@@ -1155,6 +1259,160 @@ function applyWriteGate() {
   if (!canWrite) $("delBtn").hidden = true;
 }
 
+// ----- tell me about yourself -----
+const PFIELDS = [["present", "Present"], ["past", "Past"], ["future", "Future"]];
+const WPM = 150;
+let pitches = [], pitchesLoaded = false, pEditingId = null, pSaving = false, pDraftCtl = null, pDelArmed = null;
+const wordCount = (s) => text(s).split(/\s+/).filter(Boolean).length;
+const speakSecs = (w) => Math.round(w / WPM * 60);
+const pitchBody = (p) => PFIELDS.map(([k]) => text(p[k])).filter(Boolean).join("\n\n");
+function firstSentence(s) { const t = text(s); if (!t) return ""; const m = t.match(/^[\s\S]*?[.!?](\s|$)/); return (m ? m[0] : t).trim().slice(0, 200); }
+
+function renderPitches() {
+  $("newPitchBtn").hidden = !canWrite || loadFailed;
+  const rows = $("pitchRows"); rows.replaceChildren();
+  const emptyRow = (msg) => { const tr = el("tr", "empty-row"); const td = el("td", "", msg); td.colSpan = 6; tr.append(td); rows.append(tr); };
+  if (!pitchesLoaded) { emptyRow(loadFailed ? "Pitches can't load in this view. Open the page from your claude.ai artifacts." : "Loading your pitches…"); return; }
+  if (!pitches.length) { emptyRow("No pitches yet. Select New pitch to write your answer in three parts, present, past and future."); return; }
+  const list = [...pitches].sort((a, b) => String(b.updatedAt || "").localeCompare(String(a.updatedAt || "")));
+  for (const p of list) {
+    const tr = el("tr", "pitch"); tr.tabIndex = 0;
+    tr.onclick = () => openPitch(p.id);
+    tr.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openPitch(p.id); } };
+    tr.append(el("td", "c-name", text(p.name) || "Untitled pitch"));
+    tr.append(el("td", "", firstSentence(p.present) || "Not written yet"));
+    tr.append(el("td", "", text(p.target) || "Any"));
+    const w = wordCount(pitchBody(p)), s = speakSecs(w), aim = Number(p.lengthSec) || 60;
+    const len = el("td", "c-starr", plural(w, "word", "words"));
+    len.append(el("span", "sub-line" + (s > aim * 1.15 ? " warn" : ""), `about ${s} s, aim ${aim} s`));
+    tr.append(len);
+    const status = p.status || "Draft";
+    tr.append(el("td", "c-status " + status, status));
+    tr.append(el("td", "muted-cell", fmtDate(p.updatedAt)));
+    rows.append(tr);
+  }
+}
+function readPitch() {
+  const d = { name: text($("pName").value), target: text($("pTarget").value), lengthSec: Number($("pLen").value) || 60, status: $("pStat").value, notes: text($("pNotes").value) };
+  for (const [k] of PFIELDS) d[k] = text($("p_" + k).value);
+  return d;
+}
+function updatePreview() {
+  const d = readPitch(), body = pitchBody(d), w = wordCount(body), s = speakSecs(w);
+  $("pMeta").replaceChildren(el("span", "", plural(w, "word", "words")), el("span", s > d.lengthSec * 1.15 ? "over" : "", `about ${s} s spoken`), el("span", "", `aim ${d.lengthSec} s`));
+  $("pPreview").textContent = body || "Your full answer appears here as you write the three parts.";
+}
+function fillPitch(p) {
+  $("pName").value = p.name || ""; $("pTarget").value = p.target || ""; $("pLen").value = String(p.lengthSec || 60);
+  $("pStat").value = p.status || "Draft"; $("pNotes").value = p.notes || "";
+  for (const [k] of PFIELDS) $("p_" + k).value = p[k] || "";
+  updatePreview();
+}
+["pName", "pTarget", "pLen", "p_present", "p_past", "p_future"].forEach(id => $(id).addEventListener("input", updatePreview));
+function pMsg(m, err) { $("pFormMsg").textContent = m; $("pFormMsg").className = "msg" + (err ? " err" : ""); }
+function pDisarm() { if (pDelArmed) clearTimeout(pDelArmed); pDelArmed = null; $("pDelBtn").textContent = "Delete"; }
+function openPitch(id) {
+  pEditingId = id || null;
+  const p = id ? pitches.find(x => x.id === id) : null;
+  fillPitch(p || {});
+  $("pDrawerTitle").textContent = p ? "Edit pitch" : "New pitch";
+  $("pDelBtn").hidden = !p || !canWrite; pDisarm();
+  $("pSaveBtn").hidden = !canWrite;
+  $("pAssist").hidden = !sample;
+  pMsg(""); $("pDraftMsg").textContent = "";
+  $("pScrim").hidden = false; $("pDrawer").hidden = false;
+  setTimeout(() => $("pName").focus(), 30);
+}
+function closePitch() { if (pDraftCtl) pDraftCtl.abort(); $("pScrim").hidden = true; $("pDrawer").hidden = true; pEditingId = null; }
+$("newPitchBtn").onclick = () => openPitch(null);
+$("pCloseBtn").onclick = closePitch;
+$("pScrim").onclick = closePitch;
+$("pForm").addEventListener("submit", e => e.preventDefault());
+$("pSaveBtn").onclick = async () => {
+  if (pSaving) return;
+  if (!db) { pMsg("Saving isn't available in this view.", true); return; }
+  const d = readPitch();
+  if (!d.name && !pitchBody(d)) { pMsg("Add a version name or some of the pitch first.", true); return; }
+  pSaving = true; $("pSaveBtn").disabled = true; pMsg("Saving…");
+  try {
+    const now = new Date().toISOString();
+    const prev = pEditingId ? pitches.find(x => x.id === pEditingId) : null;
+    const ref = pEditingId ? db.collection("pitches").doc(pEditingId) : db.collection("pitches").doc();
+    await ref.set({ ...d, createdAt: (prev && prev.createdAt) || now, updatedAt: now });
+    toast("Pitch saved"); closePitch();
+  } catch (e) {
+    if (e && e.code === "invalid_argument") pMsg("You have view-only access, so this pitch can't be saved.", true);
+    else if (e && e.code === "quota_exceeded") pMsg("Storage is full. Delete something to make room.", true);
+    else pMsg("Couldn't save. Check your connection and select Save again.", true);
+  } finally { pSaving = false; $("pSaveBtn").disabled = false; }
+};
+$("pDelBtn").onclick = async () => {
+  if (!pEditingId || !db) return;
+  if (!pDelArmed) { pDelArmed = setTimeout(pDisarm, 4000); $("pDelBtn").textContent = "Select again to delete"; return; }
+  pDisarm();
+  try { await db.collection("pitches").doc(pEditingId).delete(); toast("Pitch deleted"); closePitch(); }
+  catch { pMsg("Couldn't delete this pitch.", true); }
+};
+$("pCopyBtn").onclick = () => {
+  const t = pitchBody(readPitch());
+  if (!t) { pMsg("Write the pitch first.", true); return; }
+  const fallback = () => pMsg("Copy didn't work here. Select the text in the preview and copy it yourself.", true);
+  try { navigator.clipboard.writeText(t).then(() => pMsg("Copied the full pitch."), fallback); } catch { fallback(); }
+};
+function pitchPrompt(d) {
+  const words = Math.round(d.lengthSec / 60 * WPM);
+  return `Help a candidate write a spoken answer to the interview question "Tell me about yourself."
+
+About the candidate: an MBA student at UT Austin McCombs, recruiting for product management roles, formerly a front-end software developer (React, TypeScript) on a bank's foreign exchange platform.
+
+Version: ${d.name || "(not named)"}
+Target company or role: ${d.target || "not specified"}
+Target length: about ${d.lengthSec} seconds spoken, which is about ${words} words at ${WPM} words per minute.
+
+The candidate's notes:
+${d.notes || "(none)"}
+
+Current draft (keep every fact, improve the wording):
+Present: ${d.present || "(empty)"}
+Past: ${d.past || "(empty)"}
+Future: ${d.future || "(empty)"}
+
+Structure:
+- Present, 1 to 3 sentences on who they are now and what they are focused on.
+- Past, 2 to 4 sentences on the path that led here, naming only the one or two experiences most relevant to the target.
+- Future, 1 to 3 sentences on why this role and company, and what they want to do next.
+
+Rules:
+- Use only facts from the notes, the current draft and the background above. Never invent employers, metrics, awards or dates.
+- Where a specific detail is missing, write a bracketed placeholder that names it, such as [one product you use at the company].
+- First person, plain spoken sentences. Modest tone. No semicolons, no colon-led lists, no buzzwords.
+- Keep the total close to ${words} words.
+
+Reply with only a JSON object with string fields: {"name": "...", "present": "...", "past": "...", "future": "..."}. "name" is a short version label like "General PM, 60 seconds".`;
+}
+$("pDraftBtn").onclick = async () => {
+  if (!sample) return;
+  const d = readPitch();
+  if (!d.notes && !pitchBody(d)) { $("pDraftMsg").textContent = "Add notes first."; return; }
+  pDraftCtl = new AbortController();
+  $("pDraftBtn").disabled = true; $("pStopBtn").hidden = false; $("pDraftMsg").textContent = "Thinking…";
+  try {
+    const out = await sample.json(pitchPrompt(d), { signal: pDraftCtl.signal, cache: false });
+    if (out && typeof out === "object") {
+      if (!d.name && typeof out.name === "string" && out.name.trim()) $("pName").value = out.name.trim();
+      for (const [k] of PFIELDS) if (typeof out[k] === "string" && out[k].trim()) $("p_" + k).value = out[k].trim();
+      updatePreview();
+      $("pDraftMsg").textContent = "Drafted. Read it out loud, fill the [placeholders], then save.";
+    } else $("pDraftMsg").textContent = "Claude's reply didn't fit the form. Try again.";
+  } catch (e) {
+    const code = e && e.code;
+    if (code === "cancelled") $("pDraftMsg").textContent = "Stopped.";
+    else if (HIDE_CODES.includes(code)) $("pAssist").hidden = true;
+    else $("pDraftMsg").textContent = sampleErrorText(code);
+  } finally { pDraftCtl = null; $("pDraftBtn").disabled = false; $("pStopBtn").hidden = true; }
+};
+$("pStopBtn").onclick = () => pDraftCtl && pDraftCtl.abort();
+
 // ----- drawing in the sand -----
 const sand = {
   cv: $("sandCv"), live: $("sandLive"), root: $("sea"), parts: [], drawing: false, last: null, raf: 0, fadeRaf: 0, r: 9,
@@ -1293,6 +1551,11 @@ $("uploadBox").hidden = true;
     recordings = snap.docs.map(x => ({ id: x.id, ...x.data() }));
     render();
     if (!$("drawer").hidden) renderRecordings();
+  }, onErr);
+  db.collection("pitches").onSnapshot(snap => {
+    pitchesLoaded = true;
+    pitches = snap.docs.map(x => ({ id: x.id, ...x.data() }));
+    renderPitches();
   }, onErr);
 })();
 </script>
