@@ -262,6 +262,8 @@ header.top { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end; j
 .pitch-preview { border: 1px solid var(--line); border-radius: 10px; background: var(--pale); padding: 14px; display: grid; gap: 8px; }
 .pp-meta { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; font-weight: 600; color: var(--ink-2); }
 .pp-meta .over { color: #8a4510; }
+.field .hint-txt { font-weight: 400; color: var(--muted); font-size: 12px; margin-left: 6px; }
+.field textarea.pitch-box { min-height: 280px; font-size: 16px; line-height: 1.65; }
 .pitch-preview p { margin: 0; font-size: 15px; line-height: 1.6; white-space: pre-wrap; }
 .practice { border-top: 1px solid var(--line); padding-top: 16px; display: grid; gap: 12px; }
 .practice h3 { font-size: 16px; }
@@ -442,7 +444,7 @@ header.top { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end; j
       <div class="sec-head">
         <div class="sand-sub">
           <h2 class="sand-h2" id="pitchTitle">Tell me about yourself</h2>
-          <p>your opening answer, in three parts</p>
+          <p>your opening answer, one version per company</p>
         </div>
         <button class="buoy small lift" id="newPitchBtn" type="button">+ New pitch</button>
       </div>
@@ -607,16 +609,12 @@ header.top { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end; j
           <button class="btn" type="button" id="pStopBtn" hidden>Stop</button>
           <span class="msg" id="pDraftMsg"></span>
         </div>
-        <p>Claude writes the three parts to fit your target length, using only what's in your notes and fields. Missing details become [placeholders].</p>
+        <p>Claude writes your answer to fit the target length, using only what's in your notes and the box below. Missing details become [placeholders].</p>
       </div>
-      <div class="starr">
-        <div class="field"><label for="p_present"><b>1</b>Present <span class="hint-txt">who you are now and what you're focused on</span></label><textarea id="p_present"></textarea></div>
-        <div class="field"><label for="p_past"><b>2</b>Past <span class="hint-txt">the path that led here, one or two key experiences</span></label><textarea id="p_past" rows="5"></textarea></div>
-        <div class="field"><label for="p_future"><b>3</b>Future <span class="hint-txt">why this role, why this company, why now</span></label><textarea id="p_future"></textarea></div>
-      </div>
-      <div class="pitch-preview">
+      <div class="field">
+        <label for="p_pitch">Your answer <span class="hint-txt">who you are now, the path that led here, then why this role</span></label>
+        <textarea id="p_pitch" class="pitch-box" rows="12"></textarea>
         <div class="pp-meta" id="pMeta"></div>
-        <p id="pPreview"></p>
       </div>
     </form>
   </div>
@@ -1266,12 +1264,12 @@ function applyWriteGate() {
 }
 
 // ----- tell me about yourself -----
-const PFIELDS = [["present", "Present"], ["past", "Past"], ["future", "Future"]];
+const LEGACY_PARTS = ["present", "past", "future"];
 const WPM = 150;
 let pitches = [], pitchesLoaded = false, pEditingId = null, pSaving = false, pDraftCtl = null, pDelArmed = null;
 const wordCount = (s) => text(s).split(/\s+/).filter(Boolean).length;
 const speakSecs = (w) => Math.round(w / WPM * 60);
-const pitchBody = (p) => PFIELDS.map(([k]) => text(p[k])).filter(Boolean).join("\n\n");
+const pitchBody = (p) => text(p.pitch) || LEGACY_PARTS.map(k => text(p[k])).filter(Boolean).join("\n\n");
 function firstSentence(s) { const t = text(s); if (!t) return ""; const m = t.match(/^[\s\S]*?[.!?](\s|$)/); return (m ? m[0] : t).trim().slice(0, 200); }
 
 function renderPitches() {
@@ -1279,14 +1277,14 @@ function renderPitches() {
   const rows = $("pitchRows"); rows.replaceChildren();
   const emptyRow = (msg) => { const tr = el("tr", "empty-row"); const td = el("td", "", msg); td.colSpan = 6; tr.append(td); rows.append(tr); };
   if (!pitchesLoaded) { emptyRow(loadFailed ? "Pitches can't load in this view. Open the page from your claude.ai artifacts." : "Loading your pitches…"); return; }
-  if (!pitches.length) { emptyRow("No pitches yet. Select New pitch to write your answer in three parts, present, past and future."); return; }
+  if (!pitches.length) { emptyRow("No pitches yet. Select New pitch to write your answer to Tell me about yourself."); return; }
   const list = [...pitches].sort((a, b) => String(b.updatedAt || "").localeCompare(String(a.updatedAt || "")));
   for (const p of list) {
     const tr = el("tr", "pitch"); tr.tabIndex = 0;
     tr.onclick = () => openPitch(p.id);
     tr.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openPitch(p.id); } };
     tr.append(el("td", "c-name", text(p.name) || "Untitled pitch"));
-    tr.append(el("td", "", firstSentence(p.present) || "Not written yet"));
+    tr.append(el("td", "", firstSentence(pitchBody(p)) || "Not written yet"));
     tr.append(el("td", "", text(p.target) || "Any"));
     const w = wordCount(pitchBody(p)), s = speakSecs(w), aim = Number(p.lengthSec) || 60;
     const len = el("td", "c-starr", plural(w, "word", "words"));
@@ -1300,21 +1298,20 @@ function renderPitches() {
 }
 function readPitch() {
   const d = { name: text($("pName").value), target: text($("pTarget").value), lengthSec: Number($("pLen").value) || 60, status: $("pStat").value, notes: text($("pNotes").value) };
-  for (const [k] of PFIELDS) d[k] = text($("p_" + k).value);
+  d.pitch = text($("p_pitch").value);
   return d;
 }
 function updatePreview() {
   const d = readPitch(), body = pitchBody(d), w = wordCount(body), s = speakSecs(w);
   $("pMeta").replaceChildren(el("span", "", plural(w, "word", "words")), el("span", s > d.lengthSec * 1.15 ? "over" : "", `about ${s} s spoken`), el("span", "", `aim ${d.lengthSec} s`));
-  $("pPreview").textContent = body || "Your full answer appears here as you write the three parts.";
 }
 function fillPitch(p) {
   $("pName").value = p.name || ""; $("pTarget").value = p.target || ""; $("pLen").value = String(p.lengthSec || 60);
   $("pStat").value = p.status || "Draft"; $("pNotes").value = p.notes || "";
-  for (const [k] of PFIELDS) $("p_" + k).value = p[k] || "";
+  $("p_pitch").value = pitchBody(p);
   updatePreview();
 }
-["pName", "pTarget", "pLen", "p_present", "p_past", "p_future"].forEach(id => $(id).addEventListener("input", updatePreview));
+["pName", "pTarget", "pLen", "p_pitch"].forEach(id => $(id).addEventListener("input", updatePreview));
 function pMsg(m, err) { $("pFormMsg").textContent = m; $("pFormMsg").className = "msg" + (err ? " err" : ""); }
 function pDisarm() { if (pDelArmed) clearTimeout(pDelArmed); pDelArmed = null; $("pDelBtn").textContent = "Delete"; }
 function openPitch(id) {
@@ -1379,14 +1376,12 @@ The candidate's notes:
 ${d.notes || "(none)"}
 
 Current draft (keep every fact, improve the wording):
-Present: ${d.present || "(empty)"}
-Past: ${d.past || "(empty)"}
-Future: ${d.future || "(empty)"}
+${d.pitch || "(empty)"}
 
-Structure:
-- Present, 1 to 3 sentences on who they are now and what they are focused on.
-- Past, 2 to 4 sentences on the path that led here, naming only the one or two experiences most relevant to the target.
-- Future, 1 to 3 sentences on why this role and company, and what they want to do next.
+Shape it as one flowing answer in two or three short paragraphs, in this order:
+- Who they are now and what they are focused on, 1 to 3 sentences.
+- The path that led here, 2 to 4 sentences, naming only the one or two experiences most relevant to the target.
+- Why this role and company, and what they want to do next, 1 to 3 sentences.
 
 Rules:
 - Use only facts from the notes, the current draft and the background above. Never invent employers, metrics, awards or dates.
@@ -1394,7 +1389,7 @@ Rules:
 - First person, plain spoken sentences. Modest tone. No semicolons, no colon-led lists, no buzzwords.
 - Keep the total close to ${words} words.
 
-Reply with only a JSON object with string fields: {"name": "...", "present": "...", "past": "...", "future": "..."}. "name" is a short version label like "General PM, 60 seconds".`;
+Reply with only a JSON object with string fields: {"name": "...", "pitch": "..."}. "pitch" is the full answer with paragraphs separated by a blank line. "name" is a short version label like "General PM, 60 seconds".`;
 }
 $("pDraftBtn").onclick = async () => {
   if (!sample) return;
@@ -1406,7 +1401,7 @@ $("pDraftBtn").onclick = async () => {
     const out = await sample.json(pitchPrompt(d), { signal: pDraftCtl.signal, cache: false });
     if (out && typeof out === "object") {
       if (!d.name && typeof out.name === "string" && out.name.trim()) $("pName").value = out.name.trim();
-      for (const [k] of PFIELDS) if (typeof out[k] === "string" && out[k].trim()) $("p_" + k).value = out[k].trim();
+      if (typeof out.pitch === "string" && out.pitch.trim()) $("p_pitch").value = out.pitch.trim();
       updatePreview();
       $("pDraftMsg").textContent = "Drafted. Read it out loud, fill the [placeholders], then save.";
     } else $("pDraftMsg").textContent = "Claude's reply didn't fit the form. Try again.";

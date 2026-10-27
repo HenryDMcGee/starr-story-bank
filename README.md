@@ -11,7 +11,7 @@ It runs as a claude.ai artifact: https://claude.ai/artifact/F3rmG6bm93r686FWEofk
 - Tracks coverage across 8 competencies and how complete each story is
 - Holds practice recordings per story (video or audio, converted in the browser to fit 20 MB)
 - Gives Claude feedback on each take from its transcript and three video stills
-- Keeps versions of your "Tell me about yourself" answer in three parts (present, past, future), with a word count and spoken-length estimate against a 30, 60, 90 or 120 second target
+- Keeps versions of your "Tell me about yourself" answer, one text box each, with a word count and spoken-length estimate against a 30, 60, 90 or 120 second target
 - Seafloor look with sand you can draw in and a short dive intro
 
 ## Repo layout

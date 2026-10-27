@@ -20,7 +20,7 @@ Stories and practice recordings live in the artifact's own database and asset st
 
 - `stories/{id}`: prompt, title, competency, company, status, notes, situation, task, action, result, reflection, createdAt, updatedAt
 - `recordings/{id}`: storyId, videoId (asset id), frameIds, fileName, kind, durationSec, sizeBytes, uploadedAt, transcript, transcriptSource, feedback, feedbackAt
-- `pitches/{id}`: "Tell me about yourself" answers. name, target, lengthSec (30, 60, 90 or 120), status, notes, present, past, future, createdAt, updatedAt
+- `pitches/{id}`: "Tell me about yourself" answers. name, target, lengthSec (30, 60, 90 or 120), status, notes, pitch (the full answer, paragraphs separated by blank lines), createdAt, updatedAt. Older docs may hold present, past and future instead of pitch; the page joins them and saves them back as pitch.
 
 Read or write them with the ArtifactData tool against the live page URL. Do not commit story text, transcripts or recordings unless Henry asks.
 
