@@ -112,6 +112,8 @@ header.top { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end; j
 .mound { position: absolute; left: -64px; top: -34px; width: calc(100% + 136px); height: calc(100% + 110px); pointer-events: none; overflow: visible; }
 .board { position: relative; z-index: 7; pointer-events: auto; background: var(--paper); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 8px 20px rgba(40,30,10,.22); overflow: hidden; }
 .board-scroll { overflow-x: auto; }
+.board-bar { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.board-bar h2 { font-size: 16px; font-weight: 700; color: var(--ink); }
 .story-table { width: 100%; min-width: 860px; border-collapse: collapse; font-size: 15px; line-height: 1.45; color: var(--ink); }
 .story-table th { text-align: left; padding: 12px 16px; background: var(--paper-2); border-bottom: 1px solid var(--line); font-size: 13px; font-weight: 600; color: var(--ink-2); }
 .story-table th:first-child { width: 34%; }
@@ -398,7 +400,6 @@ header.top { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end; j
         <h1>STARR Story Bank</h1>
         <p>written in the sand, one story per prompt</p>
       </div>
-      <button class="buoy lift" id="newBtn" type="button">+ New story</button>
     </header>
 
     <div class="notice lift" id="notice" hidden></div>
@@ -449,6 +450,10 @@ header.top { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end; j
         </g>
       </svg>
       <div class="board">
+        <div class="board-bar">
+          <h2>STARR stories</h2>
+          <button class="btn primary" id="newBtn" type="button">+ New story</button>
+        </div>
         <div class="board-scroll">
           <table class="story-table">
             <thead><tr><th>Interview prompt</th><th>Story</th><th>Competency</th><th>STARR</th><th>Practice</th><th>Status</th></tr></thead>
@@ -464,7 +469,6 @@ header.top { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end; j
           <h2 class="sand-h2" id="pitchTitle">Tell me about yourself</h2>
           <p>your opening answer, one version per company</p>
         </div>
-        <button class="buoy small lift" id="newPitchBtn" type="button">+ New pitch</button>
       </div>
       <div class="board-wrap" style="margin-top: 22px;">
         <svg class="mound" aria-hidden="true" viewBox="0 0 1000 400" preserveAspectRatio="none">
@@ -478,6 +482,10 @@ header.top { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end; j
           </g>
         </svg>
         <div class="board">
+          <div class="board-bar">
+            <h2>Pitch versions</h2>
+            <button class="btn primary" id="newPitchBtn" type="button">+ New pitch</button>
+          </div>
           <div class="board-scroll">
             <table class="story-table pitch-table">
               <thead><tr><th>Version</th><th>Opening line</th><th>Target</th><th>Length</th><th>Practice</th><th>Status</th><th>Updated</th></tr></thead>
