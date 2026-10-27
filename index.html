@@ -132,7 +132,7 @@ header.top { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end; j
 .story-table tr.pitch { cursor: pointer; }
 .story-table tr.pitch:hover td { background: #f7f9fa; }
 .pitch-table th:first-child { width: 22%; }
-.pitch-table th:nth-child(2) { width: 40%; }
+.pitch-table th:nth-child(2) { width: 34%; }
 .c-name { font-weight: 600; }
 .muted-cell { color: var(--muted); font-size: 13px; white-space: nowrap; }
 @media (max-width: 640px) {
@@ -160,8 +160,9 @@ header.top { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end; j
   .story-table tr.pitch td:nth-child(2)::before { content: "Opening line"; }
   .story-table tr.pitch td:nth-child(3)::before { content: "Target"; }
   .story-table tr.pitch td:nth-child(4)::before { content: "Length"; }
-  .story-table tr.pitch td:nth-child(5)::before { content: "Status"; }
-  .story-table tr.pitch td:nth-child(6)::before { content: "Updated"; }
+  .story-table tr.pitch td:nth-child(5)::before { content: "Practice"; }
+  .story-table tr.pitch td:nth-child(6)::before { content: "Status"; }
+  .story-table tr.pitch td:nth-child(7)::before { content: "Updated"; }
 }
 
 /* Controls on the seafloor */
@@ -311,6 +312,23 @@ header.top { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end; j
   .drawer { animation: pop .18s ease-out; }
   @keyframes pop { from { transform: translate(-50%, -48%) scale(.98); opacity: .6; } to { transform: translate(-50%, -50%); opacity: 1; } }
 }
+/* Pitch version history */
+.history { border-top: 1px solid var(--line); padding-top: 16px; display: grid; gap: 12px; }
+.history h3 { font-size: 16px; }
+.vers { display: grid; gap: 10px; }
+.ver { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; display: grid; gap: 8px; background: var(--paper); min-width: 0; }
+.ver.latest { border-color: var(--deep); }
+.ver-head { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; }
+.ver-head b { font-family: var(--f-mono); font-size: 13px; color: var(--deep); }
+.ver-meta { font-size: 13px; color: var(--muted); }
+.ver-note { margin: 0; font-size: 14px; }
+.ver .row { display: flex; flex-wrap: wrap; gap: 8px; }
+.ver-text { border-top: 1px dashed var(--line); padding-top: 10px; display: grid; gap: 6px; }
+.ver-legend { font-size: 12px; color: var(--muted); }
+.ver-text p { margin: 0; font-size: 15px; line-height: 1.7; }
+.ver-text p.plain { white-space: pre-wrap; }
+.diff ins { text-decoration: none; background: #d5efe2; color: #14502f; border-radius: 3px; padding: 0 2px; }
+.diff del { background: #f9dcd8; color: #8a2b22; border-radius: 3px; padding: 0 2px; }
 </style>
 
 <div class="sea" id="sea">
@@ -462,8 +480,8 @@ header.top { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end; j
         <div class="board">
           <div class="board-scroll">
             <table class="story-table pitch-table">
-              <thead><tr><th>Version</th><th>Opening line</th><th>Target</th><th>Length</th><th>Status</th><th>Updated</th></tr></thead>
-              <tbody id="pitchRows"><tr class="empty-row"><td colspan="6">Loading your pitches…</td></tr></tbody>
+              <thead><tr><th>Version</th><th>Opening line</th><th>Target</th><th>Length</th><th>Practice</th><th>Status</th><th>Updated</th></tr></thead>
+              <tbody id="pitchRows"><tr class="empty-row"><td colspan="7">Loading your pitches…</td></tr></tbody>
             </table>
           </div>
         </div>
@@ -617,6 +635,36 @@ header.top { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end; j
         <div class="pp-meta" id="pMeta"></div>
       </div>
     </form>
+
+    <section class="history" aria-labelledby="pHistTitle">
+      <div class="practice-head">
+        <div>
+          <h3 id="pHistTitle">Version history</h3>
+          <p>Every save that changes the pitch becomes a new version, so you can compare versions and go back to an older one.</p>
+        </div>
+      </div>
+      <div class="field">
+        <label for="pVerNote">What changed in this version <span class="hint-txt">optional, kept with your next save</span></label>
+        <input id="pVerNote" placeholder="For example, shorter opening, added why Google">
+      </div>
+      <div class="vers" id="pVersions"></div>
+    </section>
+
+    <section class="practice" aria-labelledby="pPracticeTitle">
+      <div class="practice-head">
+        <div>
+          <h3 id="pPracticeTitle">Practice recordings</h3>
+          <p>Upload a video or audio take of you giving this pitch. Each take is tagged with the version you were practicing. Feedback needs a transcript. Paste one, or ask Claude in chat to transcribe your new recordings.</p>
+        </div>
+        <div class="upload" id="pUploadBox" hidden>
+          <input type="file" id="pFileIn" accept="video/*,audio/*" hidden>
+          <button class="btn" type="button" id="pUploadBtn">Upload recording</button>
+        </div>
+      </div>
+      <div class="upload" id="pUpStatus" hidden><span class="msg" id="pUpMsg"></span><div class="progress"><span id="pUpBar"></span></div></div>
+      <p class="msg" id="pRecNote" hidden></p>
+      <div class="recs" id="pRecs"></div>
+    </section>
   </div>
   <div class="drawer-foot">
     <button class="btn primary" type="button" id="pSaveBtn">Save pitch</button>
@@ -681,7 +729,7 @@ function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = fals
 function notice(msg) { const n = $("notice"); n.textContent = msg; n.hidden = !msg; }
 function avgScore(fb) {
   if (!fb || !fb.scores) return null;
-  const v = SCORE_KEYS.map(([k]) => Number(fb.scores[k])).filter(n => n >= 1 && n <= 5);
+  const v = Object.values(fb.scores).map(Number).filter(n => n >= 1 && n <= 5);
   return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null;
 }
 function recsFor(storyId) {
@@ -1011,43 +1059,76 @@ async function transcode(file, dur, hasVideo, onProgress) {
   }
 }
 
-// ----- recordings: upload -----
-function upMsg(m, pct) {
-  $("upStatus").hidden = false; $("upMsg").textContent = m;
-  $("upBar").parentElement.hidden = pct == null; if (pct != null) $("upBar").style.width = Math.round(pct * 100) + "%";
-}
-$("uploadBtn").onclick = async () => {
-  if (!editingId) { const ok = await save(true); if (!ok) return; }
-  $("fileIn").value = ""; $("fileIn").click();
+// ----- recordings: shared by stories and pitches -----
+const PRACTICE = {
+  story: {
+    key: "storyId", noun: "story",
+    ids: { recs: "recs", box: "uploadBox", btn: "uploadBtn", file: "fileIn", status: "upStatus", msg: "upMsg", bar: "upBar", note: "recNote" },
+    currentId: () => editingId,
+    ensureSaved: () => save(true),
+    isOpen: () => !$("drawer").hidden,
+    extra: () => ({}),
+    emptyNote: "No takes yet. Record yourself answering the prompt on your phone or laptop, then upload it here."
+  },
+  pitch: {
+    key: "pitchId", noun: "pitch",
+    ids: { recs: "pRecs", box: "pUploadBox", btn: "pUploadBtn", file: "pFileIn", status: "pUpStatus", msg: "pUpMsg", bar: "pUpBar", note: "pRecNote" },
+    currentId: () => pEditingId,
+    ensureSaved: () => savePitch(true),
+    isOpen: () => !$("pDrawer").hidden,
+    extra: () => { const p = pitches.find(x => x.id === pEditingId); return { pitchVersion: (p && p.versionCount) || 0 }; },
+    emptyNote: "No takes yet. Record yourself giving this pitch on your phone or laptop, then upload it here."
+  }
 };
-$("fileIn").onchange = async () => {
-  const file = $("fileIn").files && $("fileIn").files[0];
-  if (!file || !assets || !db || !editingId || uploading) return;
-  const storyId = editingId;
-  uploading = true; $("uploadBtn").disabled = true;
+const recsOf = (kind, id) => recordings.filter(r => r[PRACTICE[kind].key] === id).sort((a, b) => String(a.uploadedAt || "").localeCompare(String(b.uploadedAt || "")));
+function latestScoreOf(kind, id) {
+  const withFb = recsOf(kind, id).filter(r => avgScore(r.feedback) != null);
+  return withFb.length ? avgScore(withFb[withFb.length - 1].feedback) : null;
+}
+
+// ----- recordings: upload -----
+function upMsg(kind, m, pct) {
+  const ids = PRACTICE[kind].ids;
+  $(ids.status).hidden = false; $(ids.msg).textContent = m;
+  $(ids.bar).parentElement.hidden = pct == null; if (pct != null) $(ids.bar).style.width = Math.round(pct * 100) + "%";
+}
+for (const kind of Object.keys(PRACTICE)) {
+  const ctx = PRACTICE[kind];
+  $(ctx.ids.btn).onclick = async () => {
+    if (!ctx.currentId()) { const ok = await ctx.ensureSaved(); if (!ok) return; }
+    $(ctx.ids.file).value = ""; $(ctx.ids.file).click();
+  };
+  $(ctx.ids.file).onchange = () => handleUpload(kind);
+}
+async function handleUpload(kind) {
+  const ctx = PRACTICE[kind], ids = ctx.ids;
+  const file = $(ids.file).files && $(ids.file).files[0];
+  const ownerId = ctx.currentId();
+  if (!file || !assets || !db || !ownerId || uploading) return;
+  uploading = true; $(ids.btn).disabled = true;
   const uploadedIds = [];
   try {
-    upMsg("Reading the recording…", null);
+    upMsg(kind, "Reading the recording…", null);
     const info = await probe(file);
     let blob = file;
     const okType = file.type === "video/mp4" || file.type === "video/webm";
     if (!okType || file.size > LIMIT) {
       if (!info.dur) throw new Error("This file can't be read here. Try an MP4 or WebM export.");
-      upMsg(`Converting to a smaller file (${fmtDur(info.dur)} of playback). Keep this tab open…`, 0);
-      blob = await transcode(file, info.dur, info.hasVideo, p => upMsg(`Converting to a smaller file. Keep this tab open… ${Math.round(p * 100)}%`, p));
+      upMsg(kind, `Converting to a smaller file (${fmtDur(info.dur)} of playback). Keep this tab open…`, 0);
+      blob = await transcode(file, info.dur, info.hasVideo, p => upMsg(kind, `Converting to a smaller file. Keep this tab open… ${Math.round(p * 100)}%`, p));
       if (blob.size > LIMIT) throw new Error(`The converted file is ${fmtMB(blob.size)}, over the 20 MB limit. Record a shorter take.`);
     }
-    upMsg("Uploading…", null);
+    upMsg(kind, "Uploading…", null);
     const up = await assets.upload(blob, { type: blob.type || "video/mp4" });
     uploadedIds.push(up.id);
     const frameIds = [];
     for (const f of info.frames) { try { const r = await assets.upload(f, { type: "image/jpeg" }); frameIds.push(r.id); uploadedIds.push(r.id); } catch {} }
     await db.collection("recordings").doc().set({
-      storyId, videoId: up.id, frameIds, fileName: file.name, kind: info.hasVideo ? "video" : "audio",
+      [ctx.key]: ownerId, ...ctx.extra(), videoId: up.id, frameIds, fileName: file.name, kind: info.hasVideo ? "video" : "audio",
       durationSec: Math.round(info.dur), sizeBytes: up.sizeBytes, uploadedAt: new Date().toISOString(),
       transcript: "", transcriptSource: "", feedback: null, feedbackAt: ""
     });
-    $("upStatus").hidden = true; toast("Recording saved");
+    $(ids.status).hidden = true; toast("Recording saved");
   } catch (e) {
     for (const id of uploadedIds) { try { await assets.delete(id); } catch {} }
     const code = e && e.code;
@@ -1060,10 +1141,10 @@ $("fileIn").onchange = async () => {
     else if (code === "invalid_argument") m = "You don't have permission to save recordings here.";
     else if (e && e.message === "timeout") m = "The recording took too long to read. Try an MP4 export.";
     else if (e && e.message === "media_error") m = "This browser can't play that file. Try an MP4 export.";
-    upMsg(m, null); $("upMsg").className = "msg err";
-    setTimeout(() => { $("upMsg").className = "msg"; }, 8000);
-  } finally { uploading = false; $("uploadBtn").disabled = false; }
-};
+    upMsg(kind, m, null); $(ids.msg).className = "msg err";
+    setTimeout(() => { $(ids.msg).className = "msg"; }, 8000);
+  } finally { uploading = false; $(ids.btn).disabled = false; }
+}
 
 async function removeRecording(r) {
   for (const id of [r.videoId, ...(r.frameIds || [])]) { if (id && assets) { try { await assets.delete(id); } catch {} } }
@@ -1072,6 +1153,9 @@ async function removeRecording(r) {
 }
 
 // ----- recordings: feedback -----
+const PITCH_SCORE_KEYS = [["structure", "Structure"], ["hook", "Opening"], ["relevance", "Relevance"], ["close", "Close"], ["delivery", "Delivery"]];
+const PITCH_PARTS = [["present", "1"], ["past", "2"], ["future", "3"]];
+const framesLine = (r) => r.kind === "video" ? "Three still frames from the video are attached, taken at 15%, 50% and 85% of the way through." : "This is an audio-only recording, so there are no frames.";
 function feedbackPrompt(story, r) {
   const transcript = text(r.transcript);
   const words = transcript.split(/\s+/).filter(Boolean).length;
@@ -1088,7 +1172,7 @@ The candidate's written STARR plan for this story:
 ${written}
 
 Recording length: ${fmtDur(r.durationSec)} (${r.durationSec || 0} seconds). Transcript word count: ${words}.${wpm ? ` Speaking rate: about ${wpm} words per minute.` : ""}
-${r.kind === "video" ? "Three still frames from the video are attached, taken at 15%, 50% and 85% of the way through." : "This is an audio-only recording, so there are no frames."}
+${framesLine(r)}
 
 Transcript of what the candidate actually said (machine transcribed, so filler words like "um" may have been dropped and some words may be misheard):
 """
@@ -1108,12 +1192,53 @@ Reply with only a JSON object in this shape:
  "tryThis": "one improved sentence the candidate could say in the next take"}
 Scores are whole numbers from 1 (weak) to 5 (interview-ready).`;
 }
-async function getFeedback(r, setMsg) {
+function pitchFeedbackPrompt(p, r) {
+  const transcript = text(r.transcript);
+  const words = wordCount(transcript);
+  const mins = (r.durationSec || 0) / 60;
+  const wpm = mins ? Math.round(words / mins) : null;
+  const aim = Number(p.lengthSec) || 60;
+  return `You are an experienced MBA career coach giving feedback on a recorded practice answer to the interview question "Tell me about yourself." The candidate is an MBA student recruiting for product management roles, formerly a front-end software developer.
+
+Version: ${p.name || "(not named)"}${r.pitchVersion ? `, recorded while practicing saved version ${r.pitchVersion}` : ""}
+Target company or role: ${p.target || "not specified"}
+Target length: about ${aim} seconds.
+
+The candidate's written pitch:
+"""
+${pitchBody(p) || "(empty)"}
+"""
+
+Recording length: ${fmtDur(r.durationSec)} (${r.durationSec || 0} seconds). Transcript word count: ${words}.${wpm ? ` Speaking rate: about ${wpm} words per minute.` : ""}
+${framesLine(r)}
+
+Transcript of what the candidate actually said (machine transcribed, so filler words like "um" may have been dropped and some words may be misheard):
+"""
+${transcript}
+"""
+
+Give direct, specific feedback a coach would give. Quote short phrases from the transcript when pointing to something. Compare the spoken answer with the written pitch, noting parts that were skipped, rushed or added. A strong answer opens with a clear line about who they are now, tells the path that led here through one or two experiences relevant to the target, and closes on why this role and company. It should land within about ${aim} seconds. Judge the on-camera notes only on what is visible in the stills (framing, eye line toward the camera, lighting, background, posture). Do not guess at emotions. Do not invent anything the transcript doesn't support. Keep each point to one or two plain sentences, no semicolons.
+
+Reply with only a JSON object in this shape:
+{"summary": "two sentences on how the answer landed overall",
+ "scores": {"structure": 1-5, "hook": 1-5, "relevance": 1-5, "close": 1-5, "delivery": 1-5},
+ "parts": {"present": "one sentence on how the opening landed", "past": "one sentence on the path", "future": "one sentence on the close"},
+ "strengths": ["2 or 3 specific strengths"],
+ "improvements": ["3 specific, actionable changes for the next take"],
+ "pacing": "one sentence on length against the ${aim} second target and the speaking rate",
+ "onCamera": "one or two sentences from the frames, or 'Audio only, not assessed.'",
+ "tryThis": "one improved sentence the candidate could say in the next take"}
+Scores are whole numbers from 1 (weak) to 5 (interview-ready). "hook" judges the opening line, "relevance" judges whether the experiences chosen fit the target, "close" judges the why-this-role ending.`;
+}
+async function getFeedback(r, setMsg, kind) {
   if (!sample || recBusy.has(r.id)) return;
-  const story = { ...(stories.find(s => s.id === r.storyId) || {}), ...readForm() };
+  const item = kind === "pitch"
+    ? { ...(pitches.find(p => p.id === r.pitchId) || {}), ...readPitch() }
+    : { ...(stories.find(s => s.id === r.storyId) || {}), ...readForm() };
+  const promptFor = (rr) => kind === "pitch" ? pitchFeedbackPrompt(item, rr) : feedbackPrompt(item, rr);
   const ctl = new AbortController(); fbCtl.set(r.id, ctl); recBusy.add(r.id);
   setMsg("Thinking… this can take up to a minute.");
-  renderRecordings();
+  renderRecordings(kind);
   try {
     let images = [];
     if (r.kind === "video" && (r.frameIds || []).length) {
@@ -1126,9 +1251,9 @@ async function getFeedback(r, setMsg) {
     const opts = { signal: ctl.signal, cache: false };
     if (images.length) opts.images = images;
     let fb;
-    try { fb = await sample.json(feedbackPrompt(story, r), opts); }
+    try { fb = await sample.json(promptFor(r), opts); }
     catch (e) {
-      if (e && (e.code === "image_rejected" || e.code === "images_unavailable") && images.length) { delete opts.images; fb = await sample.json(feedbackPrompt({ ...story }, { ...r, kind: "audio" }), opts); }
+      if (e && (e.code === "image_rejected" || e.code === "images_unavailable") && images.length) { delete opts.images; fb = await sample.json(promptFor({ ...r, kind: "audio" }), opts); }
       else throw e;
     }
     if (!fb || typeof fb !== "object" || !fb.scores) throw { code: "invalid_json" };
@@ -1137,17 +1262,20 @@ async function getFeedback(r, setMsg) {
   } catch (e) {
     const code = e && e.code;
     if (code === "cancelled") setMsg("Stopped.");
-    else if (HIDE_CODES.includes(code)) { sample = null; $("assist").hidden = true; setMsg(""); }
+    else if (HIDE_CODES.includes(code)) { sample = null; $("assist").hidden = true; $("pAssist").hidden = true; setMsg(""); }
     else if (code === "invalid_argument") setMsg("Couldn't save the feedback. You may have view-only access.");
     else setMsg(sampleErrorText(code));
-  } finally { recBusy.delete(r.id); fbCtl.delete(r.id); renderRecordings(); }
+  } finally { recBusy.delete(r.id); fbCtl.delete(r.id); renderRecordings(kind); }
 }
 
-function renderFeedback(fb, when) {
+function renderFeedback(fb, when, kind) {
+  const keys = kind === "pitch" ? PITCH_SCORE_KEYS : SCORE_KEYS;
+  const partDefs = kind === "pitch" ? PITCH_PARTS : FIELDS;
+  const parts = kind === "pitch" ? fb.parts : fb.starr;
   const box = el("div", "fb");
   if (fb.summary) box.append(el("p", "summary", String(fb.summary)));
   const scores = el("div", "scores");
-  for (const [k, label] of SCORE_KEYS) {
+  for (const [k, label] of keys) {
     const v = Math.max(0, Math.min(5, Math.round(Number(fb.scores && fb.scores[k]) || 0)));
     const s = el("div", "score" + (v && v <= 2 ? " low" : ""));
     s.append(el("span", "", `${label} ${v || "–"}/5`));
@@ -1155,9 +1283,9 @@ function renderFeedback(fb, when) {
     s.append(pips); scores.append(s);
   }
   box.append(scores);
-  if (fb.starr && typeof fb.starr === "object") {
+  if (parts && typeof parts === "object") {
     const dl = el("dl");
-    for (const [k, l] of FIELDS) if (fb.starr[k]) { dl.append(el("dt", "", l), el("dd", "", String(fb.starr[k]))); }
+    for (const [k, l] of partDefs) if (parts[k]) { dl.append(el("dt", "", l), el("dd", "", String(parts[k]))); }
     if (dl.childNodes.length) { const w = el("div"); w.append(el("h4", "", "Part by part"), dl); box.append(w); }
   }
   const cols = el("div", "cols");
@@ -1177,23 +1305,26 @@ function renderFeedback(fb, when) {
   return box;
 }
 
-function renderRecordings() {
-  const wrap = $("recs");
+function renderRecordings(kind = "story") {
+  const ctx = PRACTICE[kind], ids = ctx.ids;
+  const wrap = $(ids.recs);
   const saved = {};
   wrap.querySelectorAll("textarea[data-rec]").forEach(t => { if (t.dataset.dirty) saved[t.dataset.rec] = t.value; });
   const focusedId = document.activeElement && document.activeElement.id;
   wrap.replaceChildren();
-  $("uploadBox").hidden = !assets || !canWrite;
-  const note = $("recNote");
-  if (!editingId) { note.hidden = false; note.textContent = assets ? "Select Upload recording to save this story and add your first take." : "Save this story to see its recordings."; return; }
-  const list = recsFor(editingId);
+  $(ids.box).hidden = !assets || !canWrite;
+  const note = $(ids.note);
+  const ownerId = ctx.currentId();
+  if (!ownerId) { note.hidden = false; note.textContent = assets ? `Select Upload recording to save this ${ctx.noun} and add your first take.` : `Save this ${ctx.noun} to see its recordings.`; return; }
+  const list = recsOf(kind, ownerId);
   note.hidden = !!list.length;
-  note.textContent = assets ? "No takes yet. Record yourself answering the prompt on your phone or laptop, then upload it here." : "No takes yet. Only editors of this page can upload recordings.";
+  note.textContent = assets ? ctx.emptyNote : "No takes yet. Only editors of this page can upload recordings.";
   list.forEach((r, i) => {
     const card = el("article", "rec");
     const head = el("div", "rec-head");
     head.append(el("h3", "", `Take ${i + 1}`));
-    head.append(el("span", "rec-meta", `${fmtDate(r.uploadedAt, true)} · ${fmtDur(r.durationSec)} · ${r.kind === "audio" ? "audio" : "video"}`));
+    const ver = kind === "pitch" && r.pitchVersion ? ` · practicing v${r.pitchVersion}` : "";
+    head.append(el("span", "rec-meta", `${fmtDate(r.uploadedAt, true)} · ${fmtDur(r.durationSec)} · ${r.kind === "audio" ? "audio" : "video"}${ver}`));
     card.append(head);
 
     let v = videoNodes.get(r.id);
@@ -1234,7 +1365,7 @@ function renderRecordings() {
       const hasT = !!text(r.transcript);
       fbBtn.disabled = busy || !hasT;
       fbBtn.title = hasT ? "" : "Save a transcript first";
-      fbBtn.onclick = () => getFeedback(r, setMsg);
+      fbBtn.onclick = () => getFeedback(r, setMsg, kind);
       row.append(fbBtn);
       if (busy) { const stop = el("button", "btn small", "Stop"); stop.type = "button"; stop.onclick = () => { const c = fbCtl.get(r.id); if (c) c.abort(); }; row.append(stop); }
       if (!hasT && !msgEl.textContent) msgEl.textContent = "Feedback needs a saved transcript.";
@@ -1244,14 +1375,14 @@ function renderRecordings() {
       const sp = el("span"); sp.style.flex = "1"; row.append(sp);
       const del = el("button", "btn small danger", recDelArmed.has(r.id) ? "Select again to delete" : "Delete take"); del.type = "button";
       del.onclick = async () => {
-        if (!recDelArmed.has(r.id)) { recDelArmed.set(r.id, setTimeout(() => { recDelArmed.delete(r.id); renderRecordings(); }, 4000)); renderRecordings(); return; }
+        if (!recDelArmed.has(r.id)) { recDelArmed.set(r.id, setTimeout(() => { recDelArmed.delete(r.id); renderRecordings(kind); }, 4000)); renderRecordings(kind); return; }
         clearTimeout(recDelArmed.get(r.id)); recDelArmed.delete(r.id);
         try { await removeRecording(r); toast("Take deleted"); } catch { setMsg("Couldn't delete this take."); }
       };
       row.append(del);
     }
     card.append(row);
-    if (r.feedback && typeof r.feedback === "object") card.append(renderFeedback(r.feedback, r.feedbackAt));
+    if (r.feedback && typeof r.feedback === "object") card.append(renderFeedback(r.feedback, r.feedbackAt, kind));
     wrap.append(card);
   });
   if (focusedId && $(focusedId)) $(focusedId).focus();
@@ -1267,6 +1398,7 @@ function applyWriteGate() {
 const LEGACY_PARTS = ["present", "past", "future"];
 const WPM = 150;
 let pitches = [], pitchesLoaded = false, pEditingId = null, pSaving = false, pDraftCtl = null, pDelArmed = null;
+let versions = [], versionsUnsub = null, openVersionId = null;
 const wordCount = (s) => text(s).split(/\s+/).filter(Boolean).length;
 const speakSecs = (w) => Math.round(w / WPM * 60);
 const pitchBody = (p) => text(p.pitch) || LEGACY_PARTS.map(k => text(p[k])).filter(Boolean).join("\n\n");
@@ -1275,7 +1407,7 @@ function firstSentence(s) { const t = text(s); if (!t) return ""; const m = t.ma
 function renderPitches() {
   $("newPitchBtn").hidden = !canWrite || loadFailed;
   const rows = $("pitchRows"); rows.replaceChildren();
-  const emptyRow = (msg) => { const tr = el("tr", "empty-row"); const td = el("td", "", msg); td.colSpan = 6; tr.append(td); rows.append(tr); };
+  const emptyRow = (msg) => { const tr = el("tr", "empty-row"); const td = el("td", "", msg); td.colSpan = 7; tr.append(td); rows.append(tr); };
   if (!pitchesLoaded) { emptyRow(loadFailed ? "Pitches can't load in this view. Open the page from your claude.ai artifacts." : "Loading your pitches…"); return; }
   if (!pitches.length) { emptyRow("No pitches yet. Select New pitch to write your answer to Tell me about yourself."); return; }
   const list = [...pitches].sort((a, b) => String(b.updatedAt || "").localeCompare(String(a.updatedAt || "")));
@@ -1283,13 +1415,19 @@ function renderPitches() {
     const tr = el("tr", "pitch"); tr.tabIndex = 0;
     tr.onclick = () => openPitch(p.id);
     tr.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openPitch(p.id); } };
-    tr.append(el("td", "c-name", text(p.name) || "Untitled pitch"));
+    const name = el("td", "c-name", text(p.name) || "Untitled pitch");
+    if (p.versionCount) name.append(el("span", "sub-line", `v${p.versionCount}`));
+    tr.append(name);
     tr.append(el("td", "", firstSentence(pitchBody(p)) || "Not written yet"));
     tr.append(el("td", "", text(p.target) || "Any"));
     const w = wordCount(pitchBody(p)), s = speakSecs(w), aim = Number(p.lengthSec) || 60;
     const len = el("td", "c-starr", plural(w, "word", "words"));
     len.append(el("span", "sub-line" + (s > aim * 1.15 ? " warn" : ""), `about ${s} s, aim ${aim} s`));
     tr.append(len);
+    const pr = el("td"); const n = recsOf("pitch", p.id).length; const ls = latestScoreOf("pitch", p.id);
+    if (!n) pr.append(el("span", "none", "None yet"));
+    else { pr.append(document.createTextNode(plural(n, "take", "takes"))); if (ls != null) pr.append(el("span", "sub-line", `latest ${ls.toFixed(1)} / 5`)); }
+    tr.append(pr);
     const status = p.status || "Draft";
     tr.append(el("td", "c-status " + status, status));
     tr.append(el("td", "muted-cell", fmtDate(p.updatedAt)));
@@ -1309,11 +1447,88 @@ function fillPitch(p) {
   $("pName").value = p.name || ""; $("pTarget").value = p.target || ""; $("pLen").value = String(p.lengthSec || 60);
   $("pStat").value = p.status || "Draft"; $("pNotes").value = p.notes || "";
   $("p_pitch").value = pitchBody(p);
+  $("pVerNote").value = "";
   updatePreview();
 }
 ["pName", "pTarget", "pLen", "p_pitch"].forEach(id => $(id).addEventListener("input", updatePreview));
 function pMsg(m, err) { $("pFormMsg").textContent = m; $("pFormMsg").className = "msg" + (err ? " err" : ""); }
 function pDisarm() { if (pDelArmed) clearTimeout(pDelArmed); pDelArmed = null; $("pDelBtn").textContent = "Delete"; }
+
+// Version history: pitches/{id}/versions/{auto}, one doc per save that changed the pitch
+function watchVersions(id) {
+  if (versionsUnsub) { versionsUnsub(); versionsUnsub = null; }
+  versions = []; openVersionId = null; renderVersions();
+  if (!id || !db) return;
+  versionsUnsub = db.doc("pitches/" + id).collection("versions").onSnapshot(snap => {
+    versions = snap.docs.map(x => ({ id: x.id, ...x.data() })).sort((a, b) => (b.n || 0) - (a.n || 0));
+    renderVersions();
+  }, () => { $("pVersions").replaceChildren(el("p", "msg err", "Version history couldn't load. Reload the page to try again.")); });
+}
+const toks = (s) => text(s).split(/\s+/).filter(Boolean);
+function wordDiff(oldS, newS) {
+  const a = toks(oldS), b = toks(newS), n = a.length, m = b.length;
+  if (n * m > 600000) return b.map(t => ({ t, k: "same" }));
+  const dp = Array.from({ length: n + 1 }, () => new Uint16Array(m + 1));
+  for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) dp[i][j] = a[i] === b[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+  const out = []; let i = 0, j = 0;
+  while (i < n && j < m) {
+    if (a[i] === b[j]) { out.push({ t: a[i], k: "same" }); i++; j++; }
+    else if (dp[i + 1][j] >= dp[i][j + 1]) out.push({ t: a[i++], k: "del" });
+    else out.push({ t: b[j++], k: "add" });
+  }
+  while (i < n) out.push({ t: a[i++], k: "del" });
+  while (j < m) out.push({ t: b[j++], k: "add" });
+  return out;
+}
+function renderDiff(oldS, newS) {
+  const p = el("p", "diff");
+  for (const part of wordDiff(oldS, newS)) {
+    p.append(part.k === "add" ? el("ins", "", part.t) : part.k === "del" ? el("del", "", part.t) : document.createTextNode(part.t), document.createTextNode(" "));
+  }
+  return p;
+}
+function renderVersions() {
+  const list = $("pVersions"); list.replaceChildren();
+  if (!pEditingId) { list.append(el("p", "msg", "Save this pitch to start its history. Each save that changes the pitch becomes a new version.")); return; }
+  if (!versions.length) { list.append(el("p", "msg", "No saved versions yet. Your next save becomes v1.")); return; }
+  versions.forEach((v, idx) => {
+    const prevV = versions[idx + 1];
+    const item = el("div", "ver" + (idx === 0 ? " latest" : ""));
+    const head = el("div", "ver-head");
+    head.append(el("b", "", `v${v.n}`));
+    head.append(el("span", "ver-meta", `${fmtDate(v.savedAt, true)} · ${plural(wordCount(v.pitch), "word", "words")}${idx === 0 ? " · current" : ""}`));
+    item.append(head);
+    if (text(v.note)) item.append(el("p", "ver-note", text(v.note)));
+    const row = el("div", "row");
+    const open = openVersionId === v.id;
+    const viewBtn = el("button", "btn small", open ? "Hide" : (prevV ? `Compare with v${prevV.n}` : "View text")); viewBtn.type = "button";
+    viewBtn.onclick = () => { openVersionId = open ? null : v.id; renderVersions(); };
+    row.append(viewBtn);
+    if (idx > 0 && canWrite) {
+      const restore = el("button", "btn small", "Restore into the box"); restore.type = "button";
+      restore.onclick = () => {
+        $("p_pitch").value = v.pitch || "";
+        if (v.name) $("pName").value = v.name;
+        $("pTarget").value = v.target || "";
+        $("pLen").value = String(v.lengthSec || 60);
+        $("pVerNote").value = `Restored from v${v.n}`;
+        updatePreview();
+        pMsg(`v${v.n} is in the box. Save to keep it as v${(versions[0].n || 0) + 1}.`);
+        $("p_pitch").focus();
+      };
+      row.append(restore);
+    }
+    item.append(row);
+    if (open) {
+      const box = el("div", "ver-text");
+      if (prevV) { box.append(el("div", "ver-legend", `Changes from v${prevV.n}. Added words are highlighted in green, removed words are struck through in red.`)); box.append(renderDiff(prevV.pitch, v.pitch)); }
+      else box.append(el("p", "plain", v.pitch || ""));
+      item.append(box);
+    }
+    list.append(item);
+  });
+}
+
 function openPitch(id) {
   pEditingId = id || null;
   const p = id ? pitches.find(x => x.id === id) : null;
@@ -1323,43 +1538,72 @@ function openPitch(id) {
   $("pSaveBtn").hidden = !canWrite;
   $("pAssist").hidden = !sample;
   pMsg(""); $("pDraftMsg").textContent = "";
+  $("pUpStatus").hidden = true;
+  watchVersions(pEditingId);
+  renderRecordings("pitch");
   $("pScrim").hidden = false; $("pDrawer").hidden = false;
   setTimeout(() => $("pName").focus(), 30);
 }
-function closePitch() { if (pDraftCtl) pDraftCtl.abort(); $("pScrim").hidden = true; $("pDrawer").hidden = true; pEditingId = null; }
+function closePitch() {
+  if (uploading) { pMsg("Wait for the upload to finish before closing.", true); return; }
+  if (pDraftCtl) pDraftCtl.abort();
+  for (const c of fbCtl.values()) c.abort();
+  for (const v of videoNodes.values()) { try { v.pause(); } catch {} }
+  if (versionsUnsub) { versionsUnsub(); versionsUnsub = null; }
+  $("pScrim").hidden = true; $("pDrawer").hidden = true; pEditingId = null;
+}
 $("newPitchBtn").onclick = () => openPitch(null);
 $("pCloseBtn").onclick = closePitch;
 $("pScrim").onclick = closePitch;
 $("pForm").addEventListener("submit", e => e.preventDefault());
-$("pSaveBtn").onclick = async () => {
-  if (pSaving) return;
-  if (!db) { pMsg("Saving isn't available in this view.", true); return; }
+async function savePitch(keepOpen) {
+  if (pSaving) return false;
+  if (!db) { pMsg("Saving isn't available in this view.", true); return false; }
   const d = readPitch();
-  if (!d.name && !pitchBody(d)) { pMsg("Add a version name or some of the pitch first.", true); return; }
+  if (!d.name && !d.pitch) { pMsg("Add a version name or some of the pitch first.", true); return false; }
   pSaving = true; $("pSaveBtn").disabled = true; pMsg("Saving…");
   try {
     const now = new Date().toISOString();
     const prev = pEditingId ? pitches.find(x => x.id === pEditingId) : null;
     const ref = pEditingId ? db.collection("pitches").doc(pEditingId) : db.collection("pitches").doc();
-    await ref.set({ ...d, createdAt: (prev && prev.createdAt) || now, updatedAt: now });
-    toast("Pitch saved"); closePitch();
+    const changed = !!d.pitch && (!prev || !prev.versionCount || pitchBody(prev) !== d.pitch || text(prev.name) !== d.name || text(prev.target) !== d.target || Number(prev.lengthSec || 60) !== d.lengthSec);
+    const n = ((prev && prev.versionCount) || 0) + (changed ? 1 : 0);
+    await ref.set({ ...d, versionCount: n, createdAt: (prev && prev.createdAt) || now, updatedAt: now });
+    if (changed) await ref.collection("versions").doc().set({ n, name: d.name, target: d.target, lengthSec: d.lengthSec, pitch: d.pitch, note: text($("pVerNote").value), savedAt: now });
+    $("pVerNote").value = "";
+    toast(changed ? `Pitch saved as v${n}` : "Pitch saved");
+    if (keepOpen) {
+      const isNew = !pEditingId;
+      pEditingId = ref.id;
+      $("pDrawerTitle").textContent = "Edit pitch"; $("pDelBtn").hidden = !canWrite; pMsg("");
+      if (isNew) watchVersions(ref.id);
+      renderRecordings("pitch");
+    } else closePitch();
+    return true;
   } catch (e) {
     if (e && e.code === "invalid_argument") pMsg("You have view-only access, so this pitch can't be saved.", true);
     else if (e && e.code === "quota_exceeded") pMsg("Storage is full. Delete something to make room.", true);
     else pMsg("Couldn't save. Check your connection and select Save again.", true);
+    return false;
   } finally { pSaving = false; $("pSaveBtn").disabled = false; }
-};
+}
+$("pSaveBtn").onclick = () => savePitch(false);
 $("pDelBtn").onclick = async () => {
   if (!pEditingId || !db) return;
-  if (!pDelArmed) { pDelArmed = setTimeout(pDisarm, 4000); $("pDelBtn").textContent = "Select again to delete"; return; }
+  const takes = recsOf("pitch", pEditingId).length;
+  if (!pDelArmed) { pDelArmed = setTimeout(pDisarm, 4000); $("pDelBtn").textContent = takes ? "Select again to delete pitch, versions and takes" : "Select again to delete pitch and its versions"; return; }
   pDisarm();
-  try { await db.collection("pitches").doc(pEditingId).delete(); toast("Pitch deleted"); closePitch(); }
-  catch { pMsg("Couldn't delete this pitch.", true); }
+  try {
+    for (const r of recsOf("pitch", pEditingId)) await removeRecording(r);
+    for (const v of versions) await db.doc("pitches/" + pEditingId + "/versions/" + v.id).delete();
+    await db.collection("pitches").doc(pEditingId).delete();
+    toast("Pitch deleted"); closePitch();
+  } catch { pMsg("Couldn't delete this pitch.", true); }
 };
 $("pCopyBtn").onclick = () => {
   const t = pitchBody(readPitch());
   if (!t) { pMsg("Write the pitch first.", true); return; }
-  const fallback = () => pMsg("Copy didn't work here. Select the text in the preview and copy it yourself.", true);
+  const fallback = () => pMsg("Copy didn't work here. Select the text in the box and copy it yourself.", true);
   try { navigator.clipboard.writeText(t).then(() => pMsg("Copied the full pitch."), fallback); } catch { fallback(); }
 };
 function pitchPrompt(d) {
@@ -1408,7 +1652,7 @@ $("pDraftBtn").onclick = async () => {
   } catch (e) {
     const code = e && e.code;
     if (code === "cancelled") $("pDraftMsg").textContent = "Stopped.";
-    else if (HIDE_CODES.includes(code)) $("pAssist").hidden = true;
+    else if (HIDE_CODES.includes(code)) { sample = null; $("pAssist").hidden = true; $("assist").hidden = true; }
     else $("pDraftMsg").textContent = sampleErrorText(code);
   } finally { pDraftCtl = null; $("pDraftBtn").disabled = false; $("pStopBtn").hidden = true; }
 };
@@ -1551,7 +1795,8 @@ $("uploadBox").hidden = true;
   db.collection("recordings").onSnapshot(snap => {
     recordings = snap.docs.map(x => ({ id: x.id, ...x.data() }));
     render();
-    if (!$("drawer").hidden) renderRecordings();
+    if (!$("drawer").hidden) renderRecordings("story");
+    if (!$("pDrawer").hidden) renderRecordings("pitch");
   }, onErr);
   db.collection("pitches").onSnapshot(snap => {
     pitchesLoaded = true;

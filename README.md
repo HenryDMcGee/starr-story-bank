@@ -12,6 +12,8 @@ It runs as a claude.ai artifact: https://claude.ai/artifact/F3rmG6bm93r686FWEofk
 - Holds practice recordings per story (video or audio, converted in the browser to fit 20 MB)
 - Gives Claude feedback on each take from its transcript and three video stills
 - Keeps versions of your "Tell me about yourself" answer, one text box each, with a word count and spoken-length estimate against a 30, 60, 90 or 120 second target
+- Saves each change to a pitch as a numbered version you can compare word by word or restore
+- Holds practice recordings per pitch too, tagged with the version you practiced, with feedback on the opening, relevance, close and delivery
 - Seafloor look with sand you can draw in and a short dive intro
 
 ## Repo layout

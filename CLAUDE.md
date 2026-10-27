@@ -19,8 +19,9 @@ If the live page was changed from somewhere else, read it first (Artifact `read`
 Stories and practice recordings live in the artifact's own database and asset store on claude.ai, not in git. Collections:
 
 - `stories/{id}`: prompt, title, competency, company, status, notes, situation, task, action, result, reflection, createdAt, updatedAt
-- `recordings/{id}`: storyId, videoId (asset id), frameIds, fileName, kind, durationSec, sizeBytes, uploadedAt, transcript, transcriptSource, feedback, feedbackAt
-- `pitches/{id}`: "Tell me about yourself" answers. name, target, lengthSec (30, 60, 90 or 120), status, notes, pitch (the full answer, paragraphs separated by blank lines), createdAt, updatedAt. Older docs may hold present, past and future instead of pitch; the page joins them and saves them back as pitch.
+- `recordings/{id}`: practice takes for a story or a pitch. storyId or pitchId (one of them), pitchVersion (pitch takes only, the version being practiced), videoId (asset id), frameIds, fileName, kind, durationSec, sizeBytes, uploadedAt, transcript, transcriptSource, feedback, feedbackAt. Story feedback scores structure, specificity, impact, reflection, delivery. Pitch feedback scores structure, hook, relevance, close, delivery, with `parts` instead of `starr`.
+- `pitches/{id}`: "Tell me about yourself" answers. name, target, lengthSec (30, 60, 90 or 120), status, notes, pitch (the full answer, paragraphs separated by blank lines), versionCount, createdAt, updatedAt. Older docs may hold present, past and future instead of pitch; the page joins them and saves them back as pitch.
+- `pitches/{id}/versions/{id}`: one doc per save that changed the pitch. n, name, target, lengthSec, pitch, note, savedAt. The pitch doc's versionCount equals the highest n.
 
 Read or write them with the ArtifactData tool against the live page URL. Do not commit story text, transcripts or recordings unless Henry asks.
 
