@@ -1,0 +1,19 @@
+{
+  "name": "STARR Story Bank",
+  "artifactUrl": "https://claude.ai/artifact/F3rmG6bm93r686FWEofkSL",
+  "source": "index.html",
+  "contract": "0.2.91",
+  "capabilities": {
+    "db": {},
+    "sample": { "images": true },
+    "assets": {}
+  },
+  "icon": "notebook",
+  "description": "Your STARR interview story bank on a sandy seafloor: stories tied to prompts, competency coverage, practice recordings with Claude feedback, drawable sand and a dive intro.",
+  "design": {
+    "seafloorMockup": {
+      "artifactUrl": "https://claude.ai/artifact/EnTyGt3V1DDTFM5NoT15CM",
+      "source": "design/seafloor-mockup/"
+    }
+  }
+}

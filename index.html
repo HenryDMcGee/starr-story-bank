@@ -1,0 +1,1298 @@
+<title>STARR Story Bank</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: a snorkeler's view of the seafloor. Sand and water are one committed look (single theme). Cards lie in the sand, the story table sits above the water for reading, editing happens in a plain drawer. */
+:root {
+  color-scheme: light;
+  --sand: #d6bf8f;
+  --sand-hi: #ecdbb2;
+  --sand-ink: #a8895a;
+  --ink: #111a20;
+  --ink-2: #3d4a54;
+  --muted: #4f5b64;
+  --line: #c9cfd4;
+  --line-soft: #e3e7ea;
+  --paper: #ffffff;
+  --paper-2: #f1f3f5;
+  --pale: #f6f3ec;
+  --coral: #e0663d;
+  --accent: #c2502a;
+  --accent-soft: #f8e4da;
+  --on-accent: #ffffff;
+  --slate: #34454b;
+  --kelp: #8fc4c9;
+  --deep: #23465c;
+  --deep-soft: #c9dbe5;
+  --ok: #2c7a57;
+  --ok-soft: #dcefe5;
+  --warn: #8a5300;
+  --warn-soft: #f6ead2;
+  --danger: #b3261e;
+  --drift: #3a2c12;
+  --drift-2: #6a5634;
+  --rope: #b89c6a;
+  --f-sand: "Kalam", "Comic Sans MS", cursive;
+  --f-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+* { box-sizing: border-box; }
+body { background: var(--sand); color: var(--ink); font-family: var(--f-body); font-size: 14px; line-height: 1.5; }
+h1, h2, h3 { margin: 0; text-wrap: balance; }
+button { font: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+/* ---------- Seafloor ---------- */
+.sea { position: relative; min-height: 1100px; overflow: hidden; background: var(--sand); }
+.sand-svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.sand-cv { position: absolute; left: 0; top: 0; width: 100%; height: 100%; z-index: 1; cursor: crosshair; touch-action: none; }
+.sand-cv.live { pointer-events: none; }
+.floor-obj { position: absolute; z-index: 2; pointer-events: none; }
+
+.wrap {
+  position: relative; pointer-events: none; max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 32px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 48px 150px;
+}
+@media (min-width: 900px) { .wrap { padding-left: max(40px, env(safe-area-inset-left, 0px)); padding-right: max(40px, env(safe-area-inset-right, 0px)); } }
+.lift { position: relative; z-index: 2; pointer-events: auto; }
+
+header.top { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end; justify-content: space-between; }
+.sand-title { display: flex; flex-direction: column; gap: 4px; transform: rotate(-1.2deg); }
+.sand-title h1 { font-family: var(--f-sand); font-weight: 700; font-size: clamp(40px, 7vw, 64px); line-height: 1; color: var(--sand-ink); text-shadow: 2px 2px 0 rgba(255,244,214,.75), -1px -2px 1px rgba(90,64,28,.45); }
+.sand-title p { margin: 0; font-family: var(--f-sand); font-size: 22px; color: #94784b; text-shadow: 1px 1px 0 rgba(255,244,214,.7), -1px -1px 0 rgba(90,64,28,.35); }
+.buoy { min-height: 48px; padding: 12px 26px; border: 3px solid #fff3e8; border-radius: 999px; background: var(--accent); color: var(--on-accent); font-weight: 600; font-size: 15px; box-shadow: 8px 12px 14px rgba(80,55,20,.35), inset 0 -4px 0 rgba(0,0,0,.12); transform: rotate(2deg); }
+.buoy:hover { filter: brightness(1.07); }
+
+.notice { padding: 10px 14px; border-radius: 10px; background: var(--warn-soft); color: var(--ink); border: 1px solid var(--rope); }
+
+/* Sea-glass pebbles */
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 22px; }
+.pebble { padding: 18px 20px; box-shadow: 10px 14px 16px rgba(80,58,24,.32), inset 0 2px 0 rgba(255,255,255,.7); min-width: 0; }
+.pebble .label, .pebble .note { font-size: 12px; color: #2c4b5c; }
+.pebble .val { font-weight: 700; font-size: 34px; line-height: 1.1; color: #12343a; font-variant-numeric: tabular-nums; }
+.pebble .val small { font-size: 16px; font-weight: 500; color: #2c4b5c; }
+.pebble:nth-child(1) { background: rgba(214,236,229,.92); border-radius: 26px 30px 24px 32px; transform: rotate(-2deg); }
+.pebble:nth-child(2) { background: rgba(214,229,239,.92); border-radius: 30px 24px 32px 26px; transform: rotate(1.5deg) translateY(8px); }
+.pebble:nth-child(3) { background: rgba(241,227,201,.94); border-radius: 24px 32px 26px 28px; transform: rotate(-.8deg); }
+.pebble:nth-child(3) .label, .pebble:nth-child(3) .note, .pebble:nth-child(3) .val small { color: #5c4826; }
+.pebble:nth-child(3) .val { color: #3a2c12; }
+.pebble:nth-child(4) { background: rgba(214,236,229,.92); border-radius: 32px 26px 28px 24px; transform: rotate(2.4deg) translateY(4px); }
+.pebble:nth-child(5) { background: rgba(214,229,239,.92); border-radius: 26px 28px 32px 24px; transform: rotate(-1.6deg) translateY(10px); }
+
+/* Slate stone with coverage */
+.slate { background: var(--slate); color: #e9f1f0; border-radius: 14px 18px 12px 20px; padding: 22px 24px; box-shadow: 14px 18px 20px rgba(70,50,20,.4), inset 0 1px 0 rgba(255,255,255,.12); transform: rotate(-.5deg); min-width: 0; }
+.slate-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 16px; }
+.slate h2 { font-size: 18px; font-weight: 700; }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px; color: #b9cdd0; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+.bars { display: grid; gap: 10px 36px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.bar { display: grid; grid-template-columns: 150px minmax(0, 1fr) 24px; gap: 10px; align-items: center; font-size: 13px; }
+.bar .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar .track { height: 12px; border-radius: 6px; background: rgba(255,255,255,.1); display: flex; overflow: hidden; }
+.bar .ready { background: var(--kelp); }
+.bar .draft { background: rgba(143,196,201,.42); }
+.bar .n { font-family: var(--f-mono); font-size: 12px; text-align: right; font-variant-numeric: tabular-nums; }
+.bar.zero .name { color: #b9cdd0; }
+.bar.zero .n { color: #f4a07f; }
+
+/* Rope-tied toolbar */
+.tools { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; transform: rotate(-.4deg); }
+.tools input, .tools select { min-height: 46px; font: 14px var(--f-body); padding: 10px 16px; border: 2px solid var(--rope); border-radius: 999px; background: rgba(250,244,228,.94); color: var(--ink); box-shadow: 6px 9px 10px rgba(70,50,20,.25); }
+.tools input { flex: 1 1 260px; min-width: 0; }
+.count { font-size: 13px; font-weight: 600; color: var(--drift); background: rgba(250,244,228,.85); padding: 6px 12px; border-radius: 999px; font-variant-numeric: tabular-nums; }
+
+/* Story table: plain, above the water, resting on a sand bank */
+.board-wrap { position: relative; }
+.mound { position: absolute; left: -64px; top: -34px; width: calc(100% + 136px); height: calc(100% + 110px); pointer-events: none; overflow: visible; }
+.board { position: relative; z-index: 7; pointer-events: auto; background: var(--paper); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 8px 20px rgba(40,30,10,.22); overflow: hidden; }
+.board-scroll { overflow-x: auto; }
+.story-table { width: 100%; min-width: 860px; border-collapse: collapse; font-size: 15px; line-height: 1.45; color: var(--ink); }
+.story-table th { text-align: left; padding: 12px 16px; background: var(--paper-2); border-bottom: 1px solid var(--line); font-size: 13px; font-weight: 600; color: var(--ink-2); }
+.story-table th:first-child { width: 34%; }
+.story-table td { padding: 14px 16px; border-bottom: 1px solid var(--line-soft); vertical-align: top; }
+.story-table tbody tr:last-child td { border-bottom: 0; }
+.story-table tr.story { cursor: pointer; }
+.story-table tr.story:hover td { background: #f7f9fa; }
+.story-table .c-prompt { font-weight: 500; }
+.story-table .c-starr { white-space: nowrap; }
+.sub-line { display: block; font-size: 13px; color: var(--muted); }
+.sub-line.warn { color: #8a4510; }
+.c-status { font-weight: 600; }
+.c-status.Draft { color: var(--warn); }
+.c-status.Ready { color: var(--ok); }
+.c-status.Practiced { color: var(--deep); }
+.none { color: var(--muted); }
+.empty-row td { text-align: center; color: var(--muted); padding: 36px 16px; }
+@media (max-width: 640px) {
+  .story-table { min-width: 0; }
+  .story-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .story-table, .story-table tbody { display: block; width: 100%; }
+  .story-table tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 16px; padding: 16px; border-bottom: 1px solid var(--line); }
+  .story-table tr:last-child { border-bottom: 0; }
+  .story-table td { display: block; padding: 0; border: 0; white-space: normal; }
+  .story-table tr.story td:nth-child(1), .story-table tr.story td:nth-child(2) { grid-column: 1 / -1; }
+  .story-table tr.story td:nth-child(1) { font-size: 16px; font-weight: 600; }
+  .story-table tr.story td::before { display: block; font-size: 12px; font-weight: 600; color: var(--ink-2); margin-bottom: 2px; }
+  .story-table tr.story td:nth-child(1)::before { content: "Interview prompt"; }
+  .story-table tr.story td:nth-child(2)::before { content: "Story"; }
+  .story-table tr.story td:nth-child(3)::before { content: "Competency"; }
+  .story-table tr.story td:nth-child(4)::before { content: "STARR"; }
+  .story-table tr.story td:nth-child(5)::before { content: "Practice"; }
+  .story-table tr.story td:nth-child(6)::before { content: "Status"; }
+  .story-table tr.empty-row { display: block; }
+  .story-table tr.empty-row td { padding: 28px 16px; }
+}
+
+/* Controls on the seafloor */
+.sea-controls { position: absolute; right: max(20px, env(safe-area-inset-right, 0px)); bottom: 28px; left: max(16px, env(safe-area-inset-left, 0px)); z-index: 6; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: flex-end; pointer-events: none; }
+.hint { font-size: 13px; font-weight: 500; color: var(--drift); background: rgba(250,244,228,.9); padding: 8px 14px; border-radius: 999px; }
+.shell-btn { pointer-events: auto; min-height: 44px; font-size: 14px; font-weight: 600; padding: 10px 18px; border: 2px solid var(--rope); border-radius: 999px; background: #f6f0e1; color: var(--drift); box-shadow: 6px 9px 10px rgba(70,50,20,.3); }
+.shell-btn:hover { background: #fffaf0; }
+
+/* Water above */
+.water { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
+.tint { background: rgba(60,170,185,.227); mix-blend-mode: multiply; }
+.caustic { inset: -80px; mix-blend-mode: soft-light; }
+.caustic.a { opacity: .9; animation: drift1 14s ease-in-out infinite; background:
+  radial-gradient(60px 26px at 12% 8%, rgba(255,255,255,.9), transparent 70%), radial-gradient(90px 34px at 34% 4%, rgba(255,255,255,.75), transparent 70%),
+  radial-gradient(70px 30px at 62% 10%, rgba(255,255,255,.85), transparent 70%), radial-gradient(110px 40px at 86% 6%, rgba(255,255,255,.7), transparent 70%),
+  radial-gradient(80px 30px at 22% 22%, rgba(255,255,255,.8), transparent 70%), radial-gradient(120px 36px at 52% 26%, rgba(255,255,255,.7), transparent 70%),
+  radial-gradient(70px 28px at 80% 20%, rgba(255,255,255,.85), transparent 70%), radial-gradient(100px 34px at 10% 40%, rgba(255,255,255,.75), transparent 70%),
+  radial-gradient(80px 30px at 44% 46%, rgba(255,255,255,.8), transparent 70%), radial-gradient(110px 40px at 74% 42%, rgba(255,255,255,.7), transparent 70%),
+  radial-gradient(70px 26px at 94% 52%, rgba(255,255,255,.8), transparent 70%), radial-gradient(90px 30px at 30% 64%, rgba(255,255,255,.75), transparent 70%),
+  radial-gradient(100px 34px at 66% 70%, rgba(255,255,255,.7), transparent 70%), radial-gradient(80px 28px at 14% 86%, rgba(255,255,255,.8), transparent 70%),
+  radial-gradient(110px 36px at 84% 90%, rgba(255,255,255,.7), transparent 70%); }
+.caustic.b { opacity: .7; animation: drift2 11s ease-in-out infinite; background:
+  radial-gradient(90px 20px at 24% 14%, rgba(255,255,255,.8), transparent 70%), radial-gradient(70px 24px at 48% 18%, rgba(255,255,255,.8), transparent 70%),
+  radial-gradient(100px 22px at 70% 34%, rgba(255,255,255,.75), transparent 70%), radial-gradient(80px 22px at 30% 36%, rgba(255,255,255,.8), transparent 70%),
+  radial-gradient(90px 24px at 88% 16%, rgba(255,255,255,.75), transparent 70%), radial-gradient(70px 20px at 60% 56%, rgba(255,255,255,.8), transparent 70%),
+  radial-gradient(90px 22px at 18% 74%, rgba(255,255,255,.75), transparent 70%), radial-gradient(80px 22px at 76% 82%, rgba(255,255,255,.8), transparent 70%); }
+.vignette { background: radial-gradient(130% 110% at 50% 45%, rgba(10,50,60,0) 58%, rgba(10,50,60,.2) 78%, rgba(6,32,40,.5) 100%); }
+.fish { position: absolute; z-index: 5; top: 520px; right: 18%; width: 150px; height: 66px; pointer-events: none; opacity: .22; filter: blur(4px); animation: swim 18s linear infinite alternate; }
+.bubbles { position: absolute; z-index: 5; top: 34px; right: 38px; display: flex; flex-direction: column; align-items: center; gap: 10px; pointer-events: none; }
+.bubbles span { border-radius: 50%; border: 1.5px solid rgba(255,255,255,.7); background: rgba(255,255,255,.18); }
+
+/* Intro dive */
+.intro { position: absolute; inset: 0; z-index: 20; pointer-events: none; overflow: hidden; }
+.intro .deep { position: absolute; inset: 0; background: linear-gradient(180deg, #a6e1ea 0px, #4fb3c8 260px, #23859e 620px, #186f86 1000px, #135f74 100%); }
+.intro .surface { position: absolute; left: 0; right: 0; top: 0; height: 96px; background-image: radial-gradient(60px 12px at 50% 50%, rgba(255,255,255,.75), rgba(255,255,255,0) 70%); background-size: 170px 34px; animation: surface 3.4s ease-in-out infinite; }
+.intro .ray { position: absolute; top: -40px; transform-origin: top; background: linear-gradient(180deg, rgba(255,255,255,.38), rgba(255,255,255,0)); animation: rays 6s ease-in-out infinite; }
+.intro .caption { position: absolute; top: 132px; left: 16px; right: 16px; margin: 0; text-align: center; font-family: var(--f-sand); font-weight: 700; font-size: 36px; color: #fff; text-shadow: 0 2px 12px rgba(5,40,50,.55); }
+.intro .mover { position: absolute; top: 0; left: 50%; width: 0; height: 0; }
+.intro .mover svg { position: absolute; left: -110px; top: -50px; width: 220px; height: 100px; transform: rotate(72deg); filter: drop-shadow(8px 12px 10px rgba(5,40,50,.35)); }
+.intro .mover span { position: absolute; border-radius: 50%; border: 1.5px solid rgba(255,255,255,.85); background: rgba(255,255,255,.2); animation: bubbleUp 1.5s ease-out infinite; }
+.intro .skip { position: absolute; top: max(24px, env(safe-area-inset-top, 0px)); left: max(16px, env(safe-area-inset-left, 0px)); pointer-events: auto; min-height: 44px; font-size: 14px; font-weight: 600; padding: 10px 18px; border: 2px solid rgba(255,255,255,.85); border-radius: 999px; background: rgba(10,60,75,.5); color: #fff; }
+.intro.play .deep { animation: introWater 3.36s ease-in forwards; }
+.intro.play .caption { animation: introCaption 2.24s ease-out forwards; }
+.intro.play .mover { animation: diverDown 3.22s cubic-bezier(.4,.05,.5,1) forwards; }
+
+@keyframes drift1 { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-40px,26px) scale(1.04); } }
+@keyframes drift2 { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(36px,-22px); } }
+@keyframes swim { 0% { transform: translate(0,0) rotate(-8deg); } 100% { transform: translate(-220px,40px) rotate(-14deg); } }
+@keyframes introWater { 0%, 48% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes introCaption { 0%, 45% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-16px); } }
+@keyframes diverDown { 0% { transform: translate(10px,-170px) scale(1.45); opacity: 1; } 35% { transform: translate(-46px,170px) scale(1.05); opacity: 1; } 68% { transform: translate(22px,410px) scale(.7); opacity: 1; } 100% { transform: translate(0,600px) scale(.42); opacity: 0; } }
+@keyframes bubbleUp { 0% { transform: translate(0,0) scale(.6); opacity: 0; } 15% { opacity: .95; } 100% { transform: translate(14px,-150px) scale(1.1); opacity: 0; } }
+@keyframes rays { 0%, 100% { transform: skewX(-12deg); opacity: .5; } 50% { transform: skewX(-5deg); opacity: .9; } }
+@keyframes surface { 0%, 100% { background-position: 0 0; } 50% { background-position: 110px 8px; } }
+@media (prefers-reduced-motion: reduce) { .caustic, .fish, .intro * { animation: none !important; } }
+
+/* ---------- Drawer (plain, for reading and writing) ---------- */
+.btn { border: 1px solid var(--line); background: var(--paper); color: var(--ink); padding: 8px 14px; border-radius: 8px; font-weight: 500; min-height: 40px; }
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
+.btn.primary:hover { filter: brightness(1.07); }
+.btn.ghost { background: transparent; }
+.btn.small { padding: 5px 10px; font-size: 13px; min-height: 34px; }
+.btn.danger { color: var(--danger); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.scrim { position: fixed; inset: 0; background: rgba(6,32,40,.5); z-index: 30; }
+.drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; width: min(720px, 100%); z-index: 31; background: var(--paper); box-shadow: 0 10px 40px rgba(6,32,40,.35);
+  display: flex; flex-direction: column;
+  padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); padding-right: env(safe-area-inset-right, 0px);
+}
+.drawer-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 14px 20px; border-bottom: 1px solid var(--line); background: var(--pale); }
+.drawer-head h2 { font-size: 18px; font-weight: 700; }
+.drawer-body { overflow-y: auto; padding: 18px 20px 24px; display: grid; gap: 16px; flex: 1; }
+.drawer-foot { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 12px 20px; border-top: 1px solid var(--line); background: var(--pale); }
+.drawer-foot .spacer { flex: 1; }
+.field { display: grid; gap: 5px; min-width: 0; }
+.field label { font-size: 13px; font-weight: 600; color: var(--ink-2); }
+.field input, .field select, .field textarea, .rec textarea { font: 15px var(--f-body); padding: 9px 11px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); color: var(--ink); width: 100%; }
+.field textarea, .rec textarea { resize: vertical; min-height: 80px; line-height: 1.55; }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.starr { display: grid; gap: 12px; }
+.starr .field label { display: flex; align-items: center; gap: 8px; color: var(--ink); font-size: 14px; }
+.starr .field label b { font-family: var(--f-mono); width: 24px; height: 24px; border-radius: 6px; display: grid; place-items: center; background: var(--deep); color: #fff; font-size: 12px; }
+.starr .field:last-child label b { background: var(--accent); }
+.starr .hint-txt { font-weight: 400; color: var(--muted); font-size: 12px; }
+.assist { border: 1px dashed var(--accent); border-radius: 10px; padding: 14px; display: grid; gap: 10px; background: var(--accent-soft); }
+.assist .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.assist p { margin: 0; font-size: 12px; color: var(--ink-2); }
+.msg { font-size: 13px; color: var(--muted); }
+.msg.err { color: var(--danger); }
+.practice { border-top: 1px solid var(--line); padding-top: 16px; display: grid; gap: 12px; }
+.practice h3 { font-size: 16px; }
+.practice-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+.practice-head p { margin: 2px 0 0; font-size: 13px; color: var(--muted); max-width: 52ch; }
+.upload { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.progress { height: 6px; background: var(--paper-2); border-radius: 3px; overflow: hidden; flex: 1 1 160px; }
+.progress span { display: block; height: 100%; background: var(--accent); width: 0; transition: width .2s; }
+.recs { display: grid; gap: 12px; }
+.rec { border: 1px solid var(--line); border-radius: 10px; padding: 12px; display: grid; gap: 10px; background: var(--pale); min-width: 0; }
+.rec-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; justify-content: space-between; }
+.rec-head h3 { font-size: 15px; }
+.rec-meta { font-family: var(--f-mono); font-size: 12px; color: var(--muted); }
+.rec video { width: 100%; max-height: 300px; background: #000; border-radius: 8px; display: block; }
+.rec video.audio { max-height: 54px; background: var(--paper-2); }
+.rec .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.rec .lbl { font-size: 13px; font-weight: 600; color: var(--ink-2); display: flex; justify-content: space-between; gap: 8px; }
+.rec .lbl span { font-weight: 400; color: var(--muted); }
+.fb { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 12px; display: grid; gap: 10px; }
+.fb p { margin: 0; }
+.fb .summary { font-weight: 500; }
+.scores { display: grid; grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); gap: 6px 14px; }
+.score { display: grid; gap: 3px; font-size: 12px; color: var(--muted); }
+.pips { display: flex; gap: 3px; }
+.pips i { width: 14px; height: 6px; border-radius: 2px; background: var(--paper-2); border: 1px solid var(--line-soft); }
+.pips i.on { background: var(--deep); border-color: var(--deep); }
+.score.low .pips i.on { background: var(--accent); border-color: var(--accent); }
+.fb h4 { margin: 0 0 4px; font-size: 12px; font-family: var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+.fb ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.fb .cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.fb dl { margin: 0; display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 4px 8px; font-size: 13px; }
+.fb dt { font-family: var(--f-mono); font-size: 11px; width: 20px; height: 20px; border-radius: 4px; display: grid; place-items: center; background: var(--deep); color: #fff; }
+.fb dd { margin: 0; }
+.fb .try { border-left: 3px solid var(--accent); padding: 4px 0 4px 10px; font-style: italic; }
+.fb .when { font-size: 11px; color: var(--muted); font-family: var(--f-mono); }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: #fff; padding: 9px 16px; border-radius: 8px; z-index: 40; font-weight: 500; }
+
+@media (max-width: 860px) {
+  .bars { grid-template-columns: minmax(0, 1fr); }
+  .bar { grid-template-columns: 116px minmax(0, 1fr) 24px; }
+  .grid3, .fb .cols { grid-template-columns: 1fr; }
+  .hint { display: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .drawer { animation: slide .18s ease-out; }
+  @keyframes slide { from { transform: translateX(24px); opacity: .6; } to { transform: none; opacity: 1; } }
+}
+</style>
+
+<div class="sea" id="sea">
+  <svg class="sand-svg" aria-hidden="true">
+    <defs>
+      <filter id="ripples" x="0" y="0" width="100%" height="100%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.0045 0.045" numOctaves="2" seed="7" result="n"></feTurbulence>
+        <feDiffuseLighting in="n" lighting-color="#f1e0b8" surfaceScale="5" result="lit"><feDistantLight azimuth="235" elevation="52"></feDistantLight></feDiffuseLighting>
+        <feComposite in="lit" in2="SourceGraphic" operator="in"></feComposite>
+      </filter>
+      <filter id="mottle" x="0" y="0" width="100%" height="100%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="3" seed="11"></feTurbulence>
+        <feColorMatrix type="matrix" values="0 0 0 0 0.6  0 0 0 0 0.48  0 0 0 0 0.3  0 0 0 1.2 -0.5"></feColorMatrix>
+        <feComposite in2="SourceGraphic" operator="in"></feComposite>
+      </filter>
+      <filter id="grainDark" x="0" y="0" width="100%" height="100%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="1" seed="5"></feTurbulence>
+        <feColorMatrix type="matrix" values="0 0 0 0 0.34  0 0 0 0 0.26  0 0 0 0 0.14  1 0 0 0 0"></feColorMatrix>
+        <feComponentTransfer><feFuncA type="discrete" tableValues="0 0 0 0 0 0.9 1"></feFuncA></feComponentTransfer>
+        <feComposite in2="SourceGraphic" operator="in"></feComposite>
+      </filter>
+      <filter id="grainLight" x="0" y="0" width="100%" height="100%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="1" seed="9"></feTurbulence>
+        <feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 0.97  0 0 0 0 0.86  1 0 0 0 0"></feColorMatrix>
+        <feComponentTransfer><feFuncA type="discrete" tableValues="0 0 0 0 0 0.85 1"></feFuncA></feComponentTransfer>
+        <feComposite in2="SourceGraphic" operator="in"></feComposite>
+      </filter>
+      <filter id="grainRust" x="0" y="0" width="100%" height="100%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="1" seed="21"></feTurbulence>
+        <feColorMatrix type="matrix" values="0 0 0 0 0.66  0 0 0 0 0.4  0 0 0 0 0.2  1 0 0 0 0"></feColorMatrix>
+        <feComponentTransfer><feFuncA type="discrete" tableValues="0 0 0 0 0 0 0 1"></feFuncA></feComponentTransfer>
+        <feComposite in2="SourceGraphic" operator="in"></feComposite>
+      </filter>
+      <filter id="grainCoarse" x="0" y="0" width="100%" height="100%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.32" numOctaves="1" seed="14"></feTurbulence>
+        <feColorMatrix type="matrix" values="0 0 0 0 0.42  0 0 0 0 0.33  0 0 0 0 0.2  1 0 0 0 0"></feColorMatrix>
+        <feComponentTransfer><feFuncA type="discrete" tableValues="0 0 0 0 0 0 0 0 1"></feFuncA></feComponentTransfer>
+        <feComposite in2="SourceGraphic" operator="in"></feComposite>
+      </filter>
+    </defs>
+    <rect width="100%" height="100%" fill="#d6bf8f" filter="url(#ripples)" opacity="0.85"></rect>
+    <rect width="100%" height="100%" fill="#000" filter="url(#mottle)" opacity="0.35"></rect>
+    <rect width="100%" height="100%" fill="#000" filter="url(#grainCoarse)" opacity="0.4"></rect>
+    <rect width="100%" height="100%" fill="#000" filter="url(#grainDark)" opacity="0.6"></rect>
+    <rect width="100%" height="100%" fill="#000" filter="url(#grainRust)" opacity="0.55"></rect>
+    <rect width="100%" height="100%" fill="#000" filter="url(#grainLight)" opacity="0.75"></rect>
+  </svg>
+
+  <canvas class="sand-cv" id="sandCv" role="img" aria-label="Sand you can draw in. Hold the mouse button and drag."></canvas>
+  <canvas class="sand-cv live" id="sandLive" aria-hidden="true"></canvas>
+
+  <svg class="floor-obj" aria-hidden="true" viewBox="0 0 120 120" style="top: 300px; right: 5%; width: 92px; height: 92px; transform: rotate(18deg); filter: drop-shadow(6px 9px 6px rgba(70,50,20,.35));">
+    <path d="M60 6 L73 44 L114 46 L82 70 L93 110 L60 87 L27 110 L38 70 L6 46 L47 44 Z" fill="#e0663d" stroke="#c4532e" stroke-width="5" stroke-linejoin="round"></path>
+    <circle cx="60" cy="58" r="4" fill="#f4a07f"></circle><circle cx="60" cy="32" r="2.5" fill="#f4a07f"></circle><circle cx="86" cy="52" r="2.5" fill="#f4a07f"></circle><circle cx="34" cy="52" r="2.5" fill="#f4a07f"></circle><circle cx="76" cy="84" r="2.5" fill="#f4a07f"></circle><circle cx="44" cy="84" r="2.5" fill="#f4a07f"></circle>
+  </svg>
+  <svg class="floor-obj" aria-hidden="true" viewBox="0 0 100 90" style="bottom: 90px; left: 5%; width: 74px; height: 66px; transform: rotate(-24deg); filter: drop-shadow(5px 7px 5px rgba(70,50,20,.35));">
+    <path d="M50 86 C20 86 4 60 6 40 C8 18 30 4 50 4 C70 4 92 18 94 40 C96 60 80 86 50 86 Z" fill="#f2e6d6" stroke="#d8c5ad" stroke-width="2"></path>
+    <path d="M50 84 L50 8 M50 84 L30 10 M50 84 L70 10 M50 84 L14 24 M50 84 L86 24 M50 84 L8 44 M50 84 L92 44" stroke="#d8c5ad" stroke-width="2" fill="none"></path>
+  </svg>
+  <svg class="floor-obj" aria-hidden="true" viewBox="0 0 60 30" style="top: 640px; left: 47%; width: 44px; height: 22px; transform: rotate(32deg); filter: drop-shadow(3px 5px 3px rgba(70,50,20,.3));">
+    <ellipse cx="30" cy="15" rx="28" ry="12" fill="#7d8b8f"></ellipse>
+  </svg>
+
+  <div class="wrap">
+    <header class="top">
+      <div class="sand-title">
+        <h1>STARR Story Bank</h1>
+        <p>written in the sand, one story per prompt</p>
+      </div>
+      <button class="buoy lift" id="newBtn" type="button">+ New story</button>
+    </header>
+
+    <div class="notice lift" id="notice" hidden></div>
+
+    <section class="kpis" aria-label="Summary">
+      <div class="pebble lift"><div class="label">Stories</div><div class="val" id="kTotal">0</div><div class="note" id="kTotalNote">in the bank</div></div>
+      <div class="pebble lift"><div class="label">Ready or practiced</div><div class="val" id="kReady">0</div><div class="note" id="kReadyNote">0 still drafts</div></div>
+      <div class="pebble lift"><div class="label">Competencies covered</div><div class="val" id="kCov">0<small> / 8</small></div><div class="note" id="kCovNote">aim for every one</div></div>
+      <div class="pebble lift"><div class="label">STARR completeness</div><div class="val" id="kComp">0%</div><div class="note">fields filled, no placeholders</div></div>
+      <div class="pebble lift"><div class="label">Practice takes</div><div class="val" id="kTakes">0</div><div class="note" id="kTakesNote">no recordings yet</div></div>
+    </section>
+
+    <section class="slate lift" aria-labelledby="covTitle">
+      <div class="slate-head">
+        <h2 id="covTitle">Coverage by competency</h2>
+        <div class="legend"><span><i style="background:var(--kelp)"></i>Ready / practiced</span><span><i style="background:rgba(143,196,201,.42)"></i>Draft</span></div>
+      </div>
+      <div class="bars" id="bars"></div>
+    </section>
+
+    <div class="tools lift">
+      <input id="q" type="search" placeholder="Search prompts, titles, story text" aria-label="Search stories">
+      <select id="fComp" aria-label="Filter by competency"><option value="">All competencies</option></select>
+      <select id="fStatus" aria-label="Filter by status"><option value="">All statuses</option><option>Draft</option><option>Ready</option><option>Practiced</option></select>
+      <select id="sortBy" aria-label="Sort"><option value="updated">Recently updated</option><option value="comp">Competency</option><option value="complete">Least complete first</option><option value="practice">Least practiced first</option></select>
+      <span class="count" id="count"></span>
+    </div>
+
+    <div class="board-wrap">
+      <svg class="mound" aria-hidden="true" viewBox="0 0 1000 400" preserveAspectRatio="none">
+        <defs>
+          <radialGradient id="moundFill" cx="48%" cy="52%" r="56%">
+            <stop offset="0%" stop-color="#ecdbb2"></stop><stop offset="62%" stop-color="#e2cd9f"></stop>
+            <stop offset="88%" stop-color="#d9c294" stop-opacity="0.85"></stop><stop offset="100%" stop-color="#d6bf8f" stop-opacity="0"></stop>
+          </radialGradient>
+          <radialGradient id="moundShade" cx="78%" cy="92%" r="40%">
+            <stop offset="0%" stop-color="#8a6c3c" stop-opacity="0.32"></stop><stop offset="100%" stop-color="#8a6c3c" stop-opacity="0"></stop>
+          </radialGradient>
+          <clipPath id="moundClip"><path d="M36 214 C24 118 118 36 300 26 C482 14 724 18 884 46 C978 66 998 170 984 254 C968 344 862 390 640 394 C418 400 176 396 86 344 C40 316 42 262 36 214 Z"></path></clipPath>
+        </defs>
+        <path d="M36 214 C24 118 118 36 300 26 C482 14 724 18 884 46 C978 66 998 170 984 254 C968 344 862 390 640 394 C418 400 176 396 86 344 C40 316 42 262 36 214 Z" fill="url(#moundFill)"></path>
+        <path d="M36 214 C24 118 118 36 300 26 C482 14 724 18 884 46 C978 66 998 170 984 254 C968 344 862 390 640 394 C418 400 176 396 86 344 C40 316 42 262 36 214 Z" fill="url(#moundShade)"></path>
+        <g clip-path="url(#moundClip)">
+          <rect width="1000" height="400" fill="#000" filter="url(#grainCoarse)" opacity="0.35"></rect>
+          <rect width="1000" height="400" fill="#000" filter="url(#grainDark)" opacity="0.55"></rect>
+          <rect width="1000" height="400" fill="#000" filter="url(#grainRust)" opacity="0.5"></rect>
+          <rect width="1000" height="400" fill="#000" filter="url(#grainLight)" opacity="0.8"></rect>
+        </g>
+      </svg>
+      <div class="board">
+        <div class="board-scroll">
+          <table class="story-table">
+            <thead><tr><th>Interview prompt</th><th>Story</th><th>Competency</th><th>STARR</th><th>Practice</th><th>Status</th></tr></thead>
+            <tbody id="rows"><tr class="empty-row"><td colspan="6">Loading your stories…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sea-controls">
+    <span class="hint">Hold and drag on the sand to draw</span>
+    <button class="shell-btn" type="button" id="replayBtn">Replay dive</button>
+    <button class="shell-btn" type="button" id="smoothBtn">Smooth the sand</button>
+  </div>
+
+  <div class="water tint" aria-hidden="true"></div>
+  <div class="water caustic a" aria-hidden="true"></div>
+  <div class="water caustic b" aria-hidden="true"></div>
+  <svg class="fish" aria-hidden="true" viewBox="0 0 160 70"><path d="M10 35 C34 8 92 6 120 35 C92 64 34 62 10 35 Z M118 35 L152 12 L144 35 L152 58 Z" fill="#1c3a3f"></path></svg>
+  <div class="water vignette" aria-hidden="true"></div>
+  <div class="bubbles" aria-hidden="true"><span style="width:9px;height:9px"></span><span style="width:14px;height:14px;margin-left:16px"></span><span style="width:7px;height:7px"></span></div>
+
+  <div class="intro" id="intro" hidden>
+    <div class="deep" aria-hidden="true">
+      <div class="surface"></div>
+      <div class="ray" style="left: 10%; width: 80px; height: 980px;"></div>
+      <div class="ray" style="left: 34%; width: 46px; height: 860px; animation-duration: 7s; animation-delay: .8s;"></div>
+      <div class="ray" style="left: 58%; width: 110px; height: 1040px; animation-duration: 8s; animation-delay: .3s;"></div>
+      <div class="ray" style="left: 82%; width: 60px; height: 900px; animation-duration: 6.5s; animation-delay: 1.2s;"></div>
+    </div>
+    <p class="caption">Diving down to your stories…</p>
+    <div class="mover" aria-hidden="true">
+      <svg viewBox="0 0 200 90">
+        <path d="M6 20 L40 35 L40 46 L3 40 Z" fill="#f2c14e"></path>
+        <path d="M8 58 L40 48 L42 59 L11 74 Z" fill="#e3ad2f"></path>
+        <rect x="36" y="34" width="62" height="12" rx="6" fill="#1b2b33"></rect>
+        <rect x="36" y="47" width="62" height="12" rx="6" fill="#22343d"></rect>
+        <rect x="88" y="30" width="66" height="30" rx="14" fill="#1b2b33"></rect>
+        <rect x="96" y="16" width="52" height="16" rx="8" fill="#e0663d"></rect>
+        <rect x="140" y="18" width="8" height="12" rx="2" fill="#c9cfd4"></rect>
+        <path d="M146 24 C162 20 176 30 176 50" stroke="#0d1a20" stroke-width="3" fill="none"></path>
+        <circle cx="166" cy="44" r="13" fill="#1b2b33"></circle>
+        <rect x="164" y="36" width="15" height="10" rx="4" fill="#9fd8e0" stroke="#0d1a20" stroke-width="2"></rect>
+        <rect x="140" y="52" width="48" height="9" rx="4.5" fill="#22343d" transform="rotate(18 140 56)"></rect>
+      </svg>
+      <span style="left: 8px; top: 34px; width: 10px; height: 10px;"></span>
+      <span style="left: 16px; top: 40px; width: 7px; height: 7px; animation-duration: 1.3s; animation-delay: .35s;"></span>
+      <span style="left: 2px; top: 44px; width: 13px; height: 13px; animation-duration: 1.7s; animation-delay: .7s;"></span>
+      <span style="left: 12px; top: 30px; width: 6px; height: 6px; animation-duration: 1.2s; animation-delay: 1s;"></span>
+    </div>
+    <button class="skip" type="button" id="skipBtn">Skip intro</button>
+  </div>
+</div>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" hidden aria-labelledby="drawerTitle" role="dialog" aria-modal="true">
+  <div class="drawer-head">
+    <h2 id="drawerTitle">New story</h2>
+    <button class="btn ghost" id="closeBtn" type="button" aria-label="Close editor">Close</button>
+  </div>
+  <div class="drawer-body">
+    <form id="form" autocomplete="off" style="display:grid;gap:16px">
+      <div class="field">
+        <label for="fPrompt">Interview prompt</label>
+        <input id="fPrompt" list="promptList" placeholder="Tell me about a time you…">
+        <datalist id="promptList"></datalist>
+      </div>
+      <div class="field">
+        <label for="fTitle">Story title</label>
+        <input id="fTitle" placeholder="A few words plus the headline result">
+      </div>
+      <div class="grid3">
+        <div class="field"><label for="fComp2">Competency</label><select id="fComp2"></select></div>
+        <div class="field"><label for="fCompany">Target company</label><input id="fCompany" placeholder="Any, or e.g. Amazon"></div>
+        <div class="field"><label for="fStat">Status</label><select id="fStat"><option>Draft</option><option>Ready</option><option>Practiced</option></select></div>
+      </div>
+
+      <div class="assist" id="assist">
+        <div class="field">
+          <label for="fNotes">Rough notes for Claude</label>
+          <textarea id="fNotes" rows="3" placeholder="What happened, in your own words. Who, what you did, what changed. Leave numbers out if you are not sure of them."></textarea>
+        </div>
+        <div class="row">
+          <button class="btn primary" type="button" id="draftBtn">Draft STARR with Claude</button>
+          <button class="btn" type="button" id="stopBtn" hidden>Stop</button>
+          <span class="msg" id="draftMsg"></span>
+        </div>
+        <p>Claude fills the five fields from your notes and any text already in them. It will not invent numbers, it leaves [placeholders] for you to fill. Nothing saves until you select Save.</p>
+      </div>
+
+      <div class="starr">
+        <div class="field"><label for="f_situation"><b>S</b>Situation <span class="hint-txt">context and the problem</span></label><textarea id="f_situation"></textarea></div>
+        <div class="field"><label for="f_task"><b>T</b>Task <span class="hint-txt">what you owned</span></label><textarea id="f_task"></textarea></div>
+        <div class="field"><label for="f_action"><b>A</b>Action <span class="hint-txt">your choices and trade-offs</span></label><textarea id="f_action" rows="5"></textarea></div>
+        <div class="field"><label for="f_result"><b>R</b>Result <span class="hint-txt">measured change</span></label><textarea id="f_result"></textarea></div>
+        <div class="field"><label for="f_reflection"><b>R</b>Reflection <span class="hint-txt">what you learned or would change</span></label><textarea id="f_reflection"></textarea></div>
+      </div>
+    </form>
+
+    <section class="practice" aria-labelledby="practiceTitle">
+      <div class="practice-head">
+        <div>
+          <h3 id="practiceTitle">Practice recordings</h3>
+          <p>Upload a video or audio take of you answering this prompt. Each take needs a transcript for feedback. Paste one, or ask Claude in chat to transcribe your new recordings.</p>
+        </div>
+        <div class="upload" id="uploadBox">
+          <input type="file" id="fileIn" accept="video/*,audio/*" hidden>
+          <button class="btn" type="button" id="uploadBtn">Upload recording</button>
+        </div>
+      </div>
+      <div class="upload" id="upStatus" hidden><span class="msg" id="upMsg"></span><div class="progress"><span id="upBar"></span></div></div>
+      <p class="msg" id="recNote" hidden></p>
+      <div class="recs" id="recs"></div>
+    </section>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn primary" type="button" id="saveBtn">Save story</button>
+    <button class="btn" type="button" id="copyBtn">Copy answer</button>
+    <span class="msg" id="formMsg"></span>
+    <span class="spacer"></span>
+    <button class="btn danger" type="button" id="delBtn" hidden>Delete</button>
+  </div>
+</aside>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const COMPETENCIES = ["Leadership", "Ownership", "Customer focus", "Data & analysis", "Ambiguity", "Influence & conflict", "Failure & learning", "Technical depth"];
+const FIELDS = [["situation", "S"], ["task", "T"], ["action", "A"], ["result", "R"], ["reflection", "R"]];
+const FIELD_NAMES = { situation: "Situation", task: "Task", action: "Action", result: "Result", reflection: "Reflection" };
+const SCORE_KEYS = [["structure", "Structure"], ["specificity", "Specificity"], ["impact", "Impact"], ["reflection", "Reflection"], ["delivery", "Delivery"]];
+const PROMPTS = [
+  "Tell me about a time you led without formal authority.",
+  "Tell me about a time you disagreed with a teammate or manager.",
+  "Tell me about a time you failed. What did you learn?",
+  "Tell me about a time you used data to make a decision.",
+  "Tell me about a time you had to deliver with unclear requirements.",
+  "Tell me about a time you went above and beyond for a customer or user.",
+  "Tell me about a time you had to prioritize competing demands.",
+  "Tell me about a time you simplified something complex.",
+  "Tell me about a time you influenced a decision you didn't own.",
+  "Tell me about a time you took ownership of a problem outside your role.",
+  "Tell me about a time you received difficult feedback.",
+  "Tell me about the most technically challenging project you've worked on.",
+  "Tell me about a time you had to make a decision quickly with incomplete information.",
+  "Tell me about a time you had to learn something new fast.",
+  "Why product management, and why now?"
+];
+const LIMIT = 19.5 * 1024 * 1024;
+const $ = (id) => document.getElementById(id);
+
+let db = null, sample = null, assets = null, canWrite = true, loaded = false, loadFailed = false;
+let stories = [], recordings = [];
+let editingId = null, saving = false, draftCtl = null, delArmed = null, uploading = false;
+const videoNodes = new Map();
+const recBusy = new Set();
+const fbCtl = new Map();
+const recMsgs = new Map();
+const recDelArmed = new Map();
+
+for (const c of COMPETENCIES) { $("fComp").append(new Option(c, c)); $("fComp2").append(new Option(c, c)); }
+for (const p of PROMPTS) { const o = document.createElement("option"); o.value = p; $("promptList").append(o); }
+
+// ----- helpers -----
+const text = (s) => (typeof s === "string" ? s : "").trim();
+function fieldState(v) { const t = text(v); if (!t) return "empty"; return /\[[^\]]+\]/.test(t) ? "ph" : "full"; }
+function completeness(s) { return FIELDS.filter(([k]) => fieldState(s[k]) === "full").length; }
+function isReady(s) { return s.status === "Ready" || s.status === "Practiced"; }
+function fmtDate(iso, withTime) {
+  if (!iso) return ""; const d = new Date(iso); if (isNaN(d)) return "";
+  return d.toLocaleDateString(undefined, withTime ? { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" } : { month: "short", day: "numeric" });
+}
+function fmtDur(sec) { sec = Math.round(sec || 0); return Math.floor(sec / 60) + ":" + String(sec % 60).padStart(2, "0"); }
+function fmtMB(b) { return (b / 1048576).toFixed(1) + " MB"; }
+function el(tag, cls, txt) { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; }
+function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(() => (t.hidden = true), 2400); }
+function notice(msg) { const n = $("notice"); n.textContent = msg; n.hidden = !msg; }
+function avgScore(fb) {
+  if (!fb || !fb.scores) return null;
+  const v = SCORE_KEYS.map(([k]) => Number(fb.scores[k])).filter(n => n >= 1 && n <= 5);
+  return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null;
+}
+function recsFor(storyId) {
+  return recordings.filter(r => r.storyId === storyId).sort((a, b) => String(a.uploadedAt || "").localeCompare(String(b.uploadedAt || "")));
+}
+function latestScore(storyId) {
+  const withFb = recsFor(storyId).filter(r => avgScore(r.feedback) != null);
+  return withFb.length ? avgScore(withFb[withFb.length - 1].feedback) : null;
+}
+const plural = (n, one, many) => n + " " + (n === 1 ? one : many);
+
+// ----- dashboard render -----
+function render() {
+  const total = stories.length;
+  const ready = stories.filter(isReady).length;
+  const covered = COMPETENCIES.filter(c => stories.some(s => s.competency === c)).length;
+  const comp = total ? Math.round(stories.reduce((a, s) => a + completeness(s), 0) / (total * 5) * 100) : 0;
+  $("kTotal").textContent = total;
+  $("kTotalNote").textContent = plural(new Set(stories.map(s => text(s.prompt)).filter(Boolean)).size, "distinct prompt", "distinct prompts");
+  $("kReady").textContent = ready;
+  $("kReadyNote").textContent = `${total - ready} still draft${total - ready === 1 ? "" : "s"}`;
+  $("kCov").firstChild.textContent = covered;
+  const missing = COMPETENCIES.filter(c => !stories.some(s => s.competency === c));
+  $("kCovNote").textContent = missing.length ? `missing ${missing.slice(0, 2).join(", ")}${missing.length > 2 ? "…" : ""}` : "every competency has a story";
+  $("kComp").textContent = comp + "%";
+  const storyIds = new Set(stories.map(s => s.id));
+  const liveRecs = recordings.filter(r => storyIds.has(r.storyId));
+  $("kTakes").textContent = liveRecs.length;
+  const scored = liveRecs.map(r => avgScore(r.feedback)).filter(v => v != null);
+  const practiced = new Set(liveRecs.map(r => r.storyId)).size;
+  $("kTakesNote").textContent = scored.length ? `avg ${(scored.reduce((a, b) => a + b, 0) / scored.length).toFixed(1)} / 5 across ${plural(practiced, "story", "stories")}` : liveRecs.length ? `across ${plural(practiced, "story", "stories")}, no feedback yet` : "no recordings yet";
+
+  const bars = $("bars"); bars.replaceChildren();
+  const counts = COMPETENCIES.map(c => {
+    const list = stories.filter(s => s.competency === c);
+    return { c, ready: list.filter(isReady).length, draft: list.filter(s => !isReady(s)).length };
+  });
+  const max = Math.max(3, ...counts.map(x => x.ready + x.draft));
+  for (const x of counts) {
+    const n = x.ready + x.draft;
+    const row = el("div", "bar" + (n ? "" : " zero"));
+    row.append(el("span", "name", x.c));
+    const tr = el("span", "track");
+    const r = el("span", "ready"); r.style.width = (x.ready / max * 100) + "%";
+    const d = el("span", "draft"); d.style.width = (x.draft / max * 100) + "%";
+    tr.append(r, d);
+    row.append(tr, el("span", "n", String(n)));
+    row.title = n ? `${x.ready} ready, ${x.draft} draft` : "No story yet";
+    bars.append(row);
+  }
+
+  const q = $("q").value.trim().toLowerCase();
+  const fc = $("fComp").value, fs = $("fStatus").value, sortBy = $("sortBy").value;
+  let list = stories.filter(s => (!fc || s.competency === fc) && (!fs || s.status === fs) &&
+    (!q || ["prompt", "title", "company", ...FIELDS.map(f => f[0])].some(k => text(s[k]).toLowerCase().includes(q))));
+  if (sortBy === "updated") list.sort((a, b) => String(b.updatedAt || "").localeCompare(String(a.updatedAt || "")));
+  if (sortBy === "comp") list.sort((a, b) => COMPETENCIES.indexOf(a.competency) - COMPETENCIES.indexOf(b.competency));
+  if (sortBy === "complete") list.sort((a, b) => completeness(a) - completeness(b));
+  if (sortBy === "practice") list.sort((a, b) => recsFor(a.id).length - recsFor(b.id).length);
+  $("count").textContent = loaded ? `${list.length} of ${total} shown` : "";
+
+  const rows = $("rows"); rows.replaceChildren();
+  const emptyRow = (msg) => { const tr = el("tr", "empty-row"); const td = el("td", "", msg); td.colSpan = 6; tr.append(td); rows.append(tr); };
+  if (!loaded) emptyRow(loadFailed ? "Stories can't load in this view. Open the page from your claude.ai artifacts." : "Loading your stories…");
+  else if (!list.length) emptyRow(total ? "No stories match these filters." : "No stories yet. Select New story, pick an interview prompt, and either write the five parts or paste rough notes and let Claude draft them.");
+  for (const s of list) {
+    const tr = el("tr", "story"); tr.tabIndex = 0;
+    tr.onclick = () => openEditor(s.id);
+    tr.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openEditor(s.id); } };
+    tr.append(el("td", "c-prompt", text(s.prompt) || "No prompt yet"));
+    const story = el("td", "", text(s.title) || "Untitled");
+    if (text(s.company)) story.append(el("span", "sub-line", "For " + text(s.company)));
+    tr.append(story);
+    tr.append(el("td", "", s.competency || "Unassigned"));
+    const done = completeness(s), ph = FIELDS.filter(([k]) => fieldState(s[k]) === "ph").length, empty = 5 - done - ph;
+    const st = el("td", "c-starr", `${done} of 5 done`);
+    if (ph) st.append(el("span", "sub-line warn", plural(ph, "placeholder", "placeholders")));
+    if (empty) st.append(el("span", "sub-line", `${empty} empty`));
+    tr.append(st);
+    const p = el("td"); const n = recsFor(s.id).length; const ls = latestScore(s.id);
+    if (!n) p.append(el("span", "none", "None yet"));
+    else { p.append(document.createTextNode(plural(n, "take", "takes"))); if (ls != null) p.append(el("span", "sub-line", `latest ${ls.toFixed(1)} / 5`)); }
+    tr.append(p);
+    const status = s.status || "Draft";
+    tr.append(el("td", "c-status " + status, status));
+    rows.append(tr);
+  }
+}
+["q", "fComp", "fStatus", "sortBy"].forEach(id => $(id).addEventListener("input", render));
+
+// ----- editor -----
+function readForm() {
+  const d = {
+    prompt: text($("fPrompt").value), title: text($("fTitle").value), competency: $("fComp2").value,
+    company: text($("fCompany").value), status: $("fStat").value, notes: text($("fNotes").value)
+  };
+  for (const [k] of FIELDS) d[k] = text($("f_" + k).value);
+  return d;
+}
+function fillForm(s) {
+  $("fPrompt").value = s.prompt || ""; $("fTitle").value = s.title || "";
+  $("fComp2").value = s.competency || COMPETENCIES[0]; $("fCompany").value = s.company || "";
+  $("fStat").value = s.status || "Draft"; $("fNotes").value = s.notes || "";
+  for (const [k] of FIELDS) $("f_" + k).value = s[k] || "";
+}
+function openEditor(id) {
+  editingId = id || null;
+  const s = id ? stories.find(x => x.id === id) : null;
+  fillForm(s || {});
+  $("drawerTitle").textContent = s ? "Edit story" : "New story";
+  $("delBtn").hidden = !s || !canWrite; disarmDelete();
+  $("saveBtn").hidden = !canWrite;
+  $("formMsg").textContent = ""; $("formMsg").className = "msg";
+  $("draftMsg").textContent = "";
+  $("upStatus").hidden = true;
+  renderRecordings();
+  $("scrim").hidden = false; $("drawer").hidden = false;
+  setTimeout(() => (s ? $("fTitle") : $("fPrompt")).focus(), 30);
+}
+function closeEditor() {
+  if (uploading) { formMsg("Wait for the upload to finish before closing.", true); return; }
+  if (draftCtl) draftCtl.abort();
+  for (const c of fbCtl.values()) c.abort();
+  for (const v of videoNodes.values()) { try { v.pause(); } catch {} }
+  $("scrim").hidden = true; $("drawer").hidden = true; editingId = null;
+}
+$("newBtn").onclick = () => openEditor(null);
+$("closeBtn").onclick = closeEditor;
+$("scrim").onclick = closeEditor;
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("drawer").hidden) closeEditor(); });
+$("form").addEventListener("submit", e => e.preventDefault());
+function formMsg(m, err) { $("formMsg").textContent = m; $("formMsg").className = "msg" + (err ? " err" : ""); }
+
+async function save(keepOpen) {
+  if (saving) return false;
+  if (!db) { formMsg("Saving isn't available in this view.", true); return false; }
+  const d = readForm();
+  if (!d.prompt && !d.title) { formMsg("Add an interview prompt or a title first.", true); return false; }
+  saving = true; $("saveBtn").disabled = true; formMsg("Saving…");
+  try {
+    const now = new Date().toISOString();
+    const prev = editingId ? stories.find(x => x.id === editingId) : null;
+    const ref = editingId ? db.collection("stories").doc(editingId) : db.collection("stories").doc();
+    await ref.set({ ...d, createdAt: (prev && prev.createdAt) || now, updatedAt: now });
+    editingId = ref.id;
+    toast("Story saved");
+    if (keepOpen) { formMsg(""); $("drawerTitle").textContent = "Edit story"; $("delBtn").hidden = !canWrite; renderRecordings(); }
+    else closeEditor();
+    return true;
+  } catch (e) {
+    if (e && e.code === "invalid_argument") { canWrite = false; applyWriteGate(); formMsg("You have view-only access, so this story can't be saved.", true); }
+    else if (e && e.code === "quota_exceeded") formMsg("The story bank is full. Delete a story to make room.", true);
+    else formMsg("Couldn't save. Check your connection and select Save again.", true);
+    return false;
+  } finally { saving = false; $("saveBtn").disabled = false; }
+}
+$("saveBtn").onclick = () => save(false);
+
+function disarmDelete() { if (delArmed) clearTimeout(delArmed); delArmed = null; $("delBtn").textContent = "Delete"; }
+$("delBtn").onclick = async () => {
+  if (!editingId || !db) return;
+  if (!delArmed) { delArmed = setTimeout(disarmDelete, 4000); $("delBtn").textContent = recsFor(editingId).length ? "Select again to delete story and its recordings" : "Select again to delete"; return; }
+  disarmDelete();
+  try {
+    for (const r of recsFor(editingId)) await removeRecording(r);
+    await db.collection("stories").doc(editingId).delete();
+    toast("Story deleted"); closeEditor();
+  } catch (e) { formMsg("Couldn't delete this story.", true); }
+};
+
+function answerText(d) {
+  const lines = [];
+  if (d.prompt) lines.push(d.prompt, "");
+  if (d.title) lines.push(d.title, "");
+  for (const [k] of FIELDS) if (d[k]) lines.push(FIELD_NAMES[k] + "\n" + d[k], "");
+  return lines.join("\n").trim();
+}
+$("copyBtn").onclick = () => {
+  const t = answerText(readForm());
+  const fallback = () => formMsg("Copy didn't work here. Select the text and copy it yourself.", true);
+  try { navigator.clipboard.writeText(t).then(() => formMsg("Copied the full answer."), fallback); } catch { fallback(); }
+};
+
+// ----- Claude drafting -----
+function buildPrompt(d) {
+  const existing = FIELDS.map(([k]) => `${k}: ${d[k] || "(empty)"}`).join("\n");
+  return `Help a candidate write one behavioral interview answer in STARR order (Situation, Task, Action, Result, Reflection).
+
+About the candidate: an MBA student at UT Austin McCombs, recruiting for product management roles, formerly a front-end software developer (React, TypeScript) on a bank's foreign exchange platform.
+
+Interview prompt: ${d.prompt || "(not given, infer the most natural one from the notes)"}
+Competency this story should show: ${d.competency}
+Target company: ${d.company || "not specified"}
+Current title: ${d.title || "(none)"}
+
+The candidate's rough notes:
+${d.notes || "(none)"}
+
+Current draft fields (keep every fact, improve the wording):
+${existing}
+
+Rules:
+- Use only facts that appear in the notes or the current fields. Never invent metrics, team sizes, dates, tools, or outcomes, and never turn participation into leadership.
+- Where a number or outcome is missing, write a bracketed placeholder that names what belongs there, such as [X% faster load time] or [number of traders].
+- First person, plain sentences the candidate can say out loud. Modest tone. No semicolons, no colon-led lists, no buzzwords.
+- Situation 2 to 3 sentences. Task 1 to 2 sentences. Action 3 to 5 sentences focused on decisions and trade-offs, not just activities. Result 1 to 3 sentences. Reflection 2 to 3 sentences with a specific lesson, never a generic one.
+- Title is a few words naming the experience plus its headline result.
+- If the notes don't answer the prompt, still draft the closest honest version and use placeholders.
+
+Reply with only a JSON object with string fields: {"title": "...", "situation": "...", "task": "...", "action": "...", "result": "...", "reflection": "..."}`;
+}
+const HIDE_CODES = ["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed"];
+function sampleErrorText(code) {
+  if (code === "rate_limited") return "Too many requests right now. Wait a minute and try again.";
+  if (code === "invalid_json") return "Claude's reply didn't fit the form. Try again.";
+  if (code === "refused") return "Claude couldn't work with this input. Change it and try again.";
+  if (code === "session_expired") return "Sign in to claude.ai again, then retry.";
+  if (code === "image_rejected") return "The video frames couldn't be read. Feedback will skip on-camera notes.";
+  return "That didn't work. Try again.";
+}
+$("draftBtn").onclick = async () => {
+  if (!sample) return;
+  const d = readForm();
+  if (!d.notes && !FIELDS.some(([k]) => d[k])) { $("draftMsg").textContent = "Add rough notes first."; return; }
+  draftCtl = new AbortController();
+  $("draftBtn").disabled = true; $("stopBtn").hidden = false; $("draftMsg").textContent = "Thinking…";
+  try {
+    const out = await sample.json(buildPrompt(d), { signal: draftCtl.signal, cache: false });
+    if (out && typeof out === "object") {
+      if (typeof out.title === "string" && out.title.trim()) $("fTitle").value = out.title.trim();
+      for (const [k] of FIELDS) if (typeof out[k] === "string" && out[k].trim()) $("f_" + k).value = out[k].trim();
+      $("draftMsg").textContent = "Drafted. Check every line, fill the [placeholders], then save.";
+    } else $("draftMsg").textContent = "Claude's reply didn't fit the form. Try again.";
+  } catch (e) {
+    const code = e && e.code;
+    if (code === "cancelled") $("draftMsg").textContent = "Stopped.";
+    else if (HIDE_CODES.includes(code)) { $("assist").hidden = true; sample = null; renderRecordings(); }
+    else $("draftMsg").textContent = sampleErrorText(code);
+  } finally { draftCtl = null; $("draftBtn").disabled = false; $("stopBtn").hidden = true; }
+};
+$("stopBtn").onclick = () => draftCtl && draftCtl.abort();
+
+// ----- recordings: media helpers -----
+function once(target, ev, ms) {
+  return new Promise((res, rej) => {
+    const t = setTimeout(() => { cleanup(); rej(new Error("timeout")); }, ms || 20000);
+    const ok = () => { cleanup(); res(); };
+    const bad = () => { cleanup(); rej(new Error("media_error")); };
+    function cleanup() { clearTimeout(t); target.removeEventListener(ev, ok); target.removeEventListener("error", bad); }
+    target.addEventListener(ev, ok, { once: true }); target.addEventListener("error", bad, { once: true });
+  });
+}
+async function probe(file) {
+  const url = URL.createObjectURL(file);
+  const v = document.createElement("video"); v.muted = true; v.playsInline = true; v.preload = "auto"; v.src = url;
+  try {
+    await once(v, "loadedmetadata");
+    let dur = v.duration;
+    if (!isFinite(dur)) { v.currentTime = 1e7; await once(v, "seeked").catch(() => {}); dur = v.duration; v.currentTime = 0; }
+    if (!isFinite(dur) || !dur) dur = 0;
+    const hasVideo = v.videoWidth > 0;
+    const frames = [];
+    if (hasVideo && dur) {
+      for (const f of [0.15, 0.5, 0.85]) {
+        try {
+          v.currentTime = dur * f; await once(v, "seeked", 8000);
+          const c = document.createElement("canvas"); const sc = Math.min(1, 640 / v.videoWidth);
+          c.width = Math.round(v.videoWidth * sc); c.height = Math.round(v.videoHeight * sc);
+          c.getContext("2d").drawImage(v, 0, 0, c.width, c.height);
+          const b = await new Promise(r => c.toBlob(r, "image/jpeg", 0.8));
+          if (b) frames.push(b);
+        } catch {}
+      }
+    }
+    return { dur, hasVideo, frames };
+  } finally { v.removeAttribute("src"); v.load(); URL.revokeObjectURL(url); }
+}
+async function transcode(file, dur, hasVideo, onProgress) {
+  if (!window.MediaRecorder) throw new Error("This browser can't convert recordings. Upload an MP4 or WebM file under 20 MB.");
+  const types = hasVideo ? ["video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus", "video/webm", "video/mp4"] : ["audio/webm;codecs=opus", "audio/webm", "audio/mp4"];
+  const mime = types.find(t => MediaRecorder.isTypeSupported(t));
+  if (!mime) throw new Error("This browser can't convert recordings. Upload an MP4 or WebM file under 20 MB.");
+  const abr = 64000;
+  const budget = LIMIT * 8 * 0.92 / Math.max(dur, 1);
+  const vbr = Math.min(1000000, budget - abr);
+  if (hasVideo && vbr < 120000) throw new Error("This take is too long to fit in 20 MB. Keep practice takes under about 8 minutes.");
+  if (!hasVideo && budget < abr) throw new Error("This recording is too long to fit in 20 MB.");
+  const url = URL.createObjectURL(file);
+  const v = document.createElement("video"); v.playsInline = true; v.preload = "auto"; v.src = url;
+  const AC = window.AudioContext || window.webkitAudioContext;
+  let ac = null, raf = 0, iv = 0;
+  try {
+    await once(v, "loadedmetadata");
+    ac = new AC(); await ac.resume();
+    const src = ac.createMediaElementSource(v); const dest = ac.createMediaStreamDestination(); src.connect(dest);
+    const tracks = [...dest.stream.getAudioTracks()];
+    let ctx = null, w = 0, h = 0;
+    if (hasVideo) {
+      const sc = Math.min(1, 480 / Math.min(v.videoWidth, v.videoHeight));
+      w = Math.round(v.videoWidth * sc / 2) * 2; h = Math.round(v.videoHeight * sc / 2) * 2;
+      const canvas = document.createElement("canvas"); canvas.width = w; canvas.height = h; ctx = canvas.getContext("2d");
+      tracks.unshift(...canvas.captureStream(30).getVideoTracks());
+    }
+    const opts = { mimeType: mime, audioBitsPerSecond: abr };
+    if (hasVideo) opts.videoBitsPerSecond = Math.round(vbr);
+    const rec = new MediaRecorder(new MediaStream(tracks), opts);
+    const chunks = []; rec.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+    const stopped = new Promise(r => (rec.onstop = r));
+    rec.start(1000);
+    await v.play();
+    const tick = () => onProgress(Math.min(1, v.currentTime / Math.max(dur, 1)));
+    if (hasVideo) { const draw = () => { ctx.drawImage(v, 0, 0, w, h); tick(); if (!v.ended) raf = requestAnimationFrame(draw); }; draw(); }
+    else iv = setInterval(tick, 500);
+    await once(v, "ended", (dur + 60) * 1000);
+    rec.stop(); await stopped;
+    const base = mime.split(";")[0];
+    return new Blob(chunks, { type: base.endsWith("mp4") ? "video/mp4" : "video/webm" });
+  } finally {
+    cancelAnimationFrame(raf); clearInterval(iv);
+    if (ac) try { ac.close(); } catch {}
+    v.pause(); v.removeAttribute("src"); v.load(); URL.revokeObjectURL(url);
+  }
+}
+
+// ----- recordings: upload -----
+function upMsg(m, pct) {
+  $("upStatus").hidden = false; $("upMsg").textContent = m;
+  $("upBar").parentElement.hidden = pct == null; if (pct != null) $("upBar").style.width = Math.round(pct * 100) + "%";
+}
+$("uploadBtn").onclick = async () => {
+  if (!editingId) { const ok = await save(true); if (!ok) return; }
+  $("fileIn").value = ""; $("fileIn").click();
+};
+$("fileIn").onchange = async () => {
+  const file = $("fileIn").files && $("fileIn").files[0];
+  if (!file || !assets || !db || !editingId || uploading) return;
+  const storyId = editingId;
+  uploading = true; $("uploadBtn").disabled = true;
+  const uploadedIds = [];
+  try {
+    upMsg("Reading the recording…", null);
+    const info = await probe(file);
+    let blob = file;
+    const okType = file.type === "video/mp4" || file.type === "video/webm";
+    if (!okType || file.size > LIMIT) {
+      if (!info.dur) throw new Error("This file can't be read here. Try an MP4 or WebM export.");
+      upMsg(`Converting to a smaller file (${fmtDur(info.dur)} of playback). Keep this tab open…`, 0);
+      blob = await transcode(file, info.dur, info.hasVideo, p => upMsg(`Converting to a smaller file. Keep this tab open… ${Math.round(p * 100)}%`, p));
+      if (blob.size > LIMIT) throw new Error(`The converted file is ${fmtMB(blob.size)}, over the 20 MB limit. Record a shorter take.`);
+    }
+    upMsg("Uploading…", null);
+    const up = await assets.upload(blob, { type: blob.type || "video/mp4" });
+    uploadedIds.push(up.id);
+    const frameIds = [];
+    for (const f of info.frames) { try { const r = await assets.upload(f, { type: "image/jpeg" }); frameIds.push(r.id); uploadedIds.push(r.id); } catch {} }
+    await db.collection("recordings").doc().set({
+      storyId, videoId: up.id, frameIds, fileName: file.name, kind: info.hasVideo ? "video" : "audio",
+      durationSec: Math.round(info.dur), sizeBytes: up.sizeBytes, uploadedAt: new Date().toISOString(),
+      transcript: "", transcriptSource: "", feedback: null, feedbackAt: ""
+    });
+    $("upStatus").hidden = true; toast("Recording saved");
+  } catch (e) {
+    for (const id of uploadedIds) { try { await assets.delete(id); } catch {} }
+    const code = e && e.code;
+    let m = (e && e.message && !code) ? e.message : "Upload failed. Try again.";
+    if (code === "too_large") m = "That file is over 20 MB. Record a shorter take.";
+    else if (code === "unsupported_type") m = "That file type isn't supported. Use MP4 or WebM.";
+    else if (code === "quota_or_state") m = "Recording storage is full. Delete an old take, then try again.";
+    else if (code === "rate_limited") m = "Too many uploads at once. Wait a minute and try again.";
+    else if (code === "upstream_auth") m = "Sign in to claude.ai again, then retry.";
+    else if (code === "invalid_argument") m = "You don't have permission to save recordings here.";
+    else if (e && e.message === "timeout") m = "The recording took too long to read. Try an MP4 export.";
+    else if (e && e.message === "media_error") m = "This browser can't play that file. Try an MP4 export.";
+    upMsg(m, null); $("upMsg").className = "msg err";
+    setTimeout(() => { $("upMsg").className = "msg"; }, 8000);
+  } finally { uploading = false; $("uploadBtn").disabled = false; }
+};
+
+async function removeRecording(r) {
+  for (const id of [r.videoId, ...(r.frameIds || [])]) { if (id && assets) { try { await assets.delete(id); } catch {} } }
+  await db.collection("recordings").doc(r.id).delete();
+  videoNodes.delete(r.id);
+}
+
+// ----- recordings: feedback -----
+function feedbackPrompt(story, r) {
+  const transcript = text(r.transcript);
+  const words = transcript.split(/\s+/).filter(Boolean).length;
+  const mins = (r.durationSec || 0) / 60;
+  const wpm = mins ? Math.round(words / mins) : null;
+  const written = FIELDS.map(([k]) => `${FIELD_NAMES[k]}: ${story[k] || "(empty)"}`).join("\n");
+  return `You are an experienced MBA career coach giving feedback on a recorded practice answer to a behavioral interview question. The candidate is an MBA student recruiting for product management roles, formerly a front-end software developer.
+
+Interview prompt: ${story.prompt || "(not given)"}
+Competency the answer should show: ${story.competency || "(not given)"}
+Target company: ${story.company || "not specified"}
+
+The candidate's written STARR plan for this story:
+${written}
+
+Recording length: ${fmtDur(r.durationSec)} (${r.durationSec || 0} seconds). Transcript word count: ${words}.${wpm ? ` Speaking rate: about ${wpm} words per minute.` : ""}
+${r.kind === "video" ? "Three still frames from the video are attached, taken at 15%, 50% and 85% of the way through." : "This is an audio-only recording, so there are no frames."}
+
+Transcript of what the candidate actually said (machine transcribed, so filler words like "um" may have been dropped and some words may be misheard):
+"""
+${transcript}
+"""
+
+Give direct, specific feedback a coach would give. Quote short phrases from the transcript when pointing to something. Compare the spoken answer with the written plan, noting parts that were skipped, rushed or added. Strong answers usually run about 90 seconds to 2 minutes, spend most of the time on Action, state a concrete Result, and end with a specific Reflection. Judge the on-camera notes only on what is visible in the stills (framing, eye line toward the camera, lighting, background, posture). Do not guess at emotions. Do not invent anything the transcript doesn't support. Keep each point to one or two plain sentences, no semicolons.
+
+Reply with only a JSON object in this shape:
+{"summary": "two sentences on how the answer landed overall",
+ "scores": {"structure": 1-5, "specificity": 1-5, "impact": 1-5, "reflection": 1-5, "delivery": 1-5},
+ "starr": {"situation": "one sentence on how this part landed", "task": "...", "action": "...", "result": "...", "reflection": "..."},
+ "strengths": ["2 or 3 specific strengths"],
+ "improvements": ["3 specific, actionable changes for the next take"],
+ "pacing": "one sentence on length and speaking rate",
+ "onCamera": "one or two sentences from the frames, or 'Audio only, not assessed.'",
+ "tryThis": "one improved sentence the candidate could say in the next take"}
+Scores are whole numbers from 1 (weak) to 5 (interview-ready).`;
+}
+async function getFeedback(r, setMsg) {
+  if (!sample || recBusy.has(r.id)) return;
+  const story = { ...(stories.find(s => s.id === r.storyId) || {}), ...readForm() };
+  const ctl = new AbortController(); fbCtl.set(r.id, ctl); recBusy.add(r.id);
+  setMsg("Thinking… this can take up to a minute.");
+  renderRecordings();
+  try {
+    let images = [];
+    if (r.kind === "video" && (r.frameIds || []).length) {
+      const caps = await sample.limits().catch(() => null);
+      if (caps && caps.images) {
+        const blobs = await Promise.all(r.frameIds.slice(0, caps.images.maxCount || 3).map(id => fetch("/_blob/" + id).then(x => x.ok ? x.blob() : null).catch(() => null)));
+        images = blobs.filter(Boolean);
+      }
+    }
+    const opts = { signal: ctl.signal, cache: false };
+    if (images.length) opts.images = images;
+    let fb;
+    try { fb = await sample.json(feedbackPrompt(story, r), opts); }
+    catch (e) {
+      if (e && (e.code === "image_rejected" || e.code === "images_unavailable") && images.length) { delete opts.images; fb = await sample.json(feedbackPrompt({ ...story }, { ...r, kind: "audio" }), opts); }
+      else throw e;
+    }
+    if (!fb || typeof fb !== "object" || !fb.scores) throw { code: "invalid_json" };
+    await db.collection("recordings").doc(r.id).update({ feedback: fb, feedbackAt: new Date().toISOString() });
+    setMsg("");
+  } catch (e) {
+    const code = e && e.code;
+    if (code === "cancelled") setMsg("Stopped.");
+    else if (HIDE_CODES.includes(code)) { sample = null; $("assist").hidden = true; setMsg(""); }
+    else if (code === "invalid_argument") setMsg("Couldn't save the feedback. You may have view-only access.");
+    else setMsg(sampleErrorText(code));
+  } finally { recBusy.delete(r.id); fbCtl.delete(r.id); renderRecordings(); }
+}
+
+function renderFeedback(fb, when) {
+  const box = el("div", "fb");
+  if (fb.summary) box.append(el("p", "summary", String(fb.summary)));
+  const scores = el("div", "scores");
+  for (const [k, label] of SCORE_KEYS) {
+    const v = Math.max(0, Math.min(5, Math.round(Number(fb.scores && fb.scores[k]) || 0)));
+    const s = el("div", "score" + (v && v <= 2 ? " low" : ""));
+    s.append(el("span", "", `${label} ${v || "–"}/5`));
+    const pips = el("span", "pips"); for (let i = 1; i <= 5; i++) pips.append(el("i", i <= v ? "on" : ""));
+    s.append(pips); scores.append(s);
+  }
+  box.append(scores);
+  if (fb.starr && typeof fb.starr === "object") {
+    const dl = el("dl");
+    for (const [k, l] of FIELDS) if (fb.starr[k]) { dl.append(el("dt", "", l), el("dd", "", String(fb.starr[k]))); }
+    if (dl.childNodes.length) { const w = el("div"); w.append(el("h4", "", "Part by part"), dl); box.append(w); }
+  }
+  const cols = el("div", "cols");
+  for (const [key, label] of [["strengths", "What worked"], ["improvements", "Next take"]]) {
+    const arr = Array.isArray(fb[key]) ? fb[key] : [];
+    if (!arr.length) continue;
+    const w = el("div"); w.append(el("h4", "", label)); const ul = el("ul");
+    for (const it of arr) ul.append(el("li", "", String(it)));
+    w.append(ul); cols.append(w);
+  }
+  if (cols.childNodes.length) box.append(cols);
+  for (const [key, label] of [["pacing", "Pacing"], ["onCamera", "On camera"]]) {
+    if (fb[key]) { const w = el("div"); w.append(el("h4", "", label), el("p", "", String(fb[key]))); box.append(w); }
+  }
+  if (fb.tryThis) { const w = el("div"); w.append(el("h4", "", "Try saying")); w.append(el("p", "try", String(fb.tryThis))); box.append(w); }
+  if (when) box.append(el("span", "when", "Feedback from " + fmtDate(when, true)));
+  return box;
+}
+
+function renderRecordings() {
+  const wrap = $("recs");
+  const saved = {};
+  wrap.querySelectorAll("textarea[data-rec]").forEach(t => { if (t.dataset.dirty) saved[t.dataset.rec] = t.value; });
+  const focusedId = document.activeElement && document.activeElement.id;
+  wrap.replaceChildren();
+  $("uploadBox").hidden = !assets || !canWrite;
+  const note = $("recNote");
+  if (!editingId) { note.hidden = false; note.textContent = assets ? "Select Upload recording to save this story and add your first take." : "Save this story to see its recordings."; return; }
+  const list = recsFor(editingId);
+  note.hidden = !!list.length;
+  note.textContent = assets ? "No takes yet. Record yourself answering the prompt on your phone or laptop, then upload it here." : "No takes yet. Only editors of this page can upload recordings.";
+  list.forEach((r, i) => {
+    const card = el("article", "rec");
+    const head = el("div", "rec-head");
+    head.append(el("h3", "", `Take ${i + 1}`));
+    head.append(el("span", "rec-meta", `${fmtDate(r.uploadedAt, true)} · ${fmtDur(r.durationSec)} · ${r.kind === "audio" ? "audio" : "video"}`));
+    card.append(head);
+
+    let v = videoNodes.get(r.id);
+    if (!v) { v = document.createElement("video"); v.controls = true; v.preload = "metadata"; v.playsInline = true; v.src = "/_blob/" + r.videoId; videoNodes.set(r.id, v); v.onerror = () => { v.replaceWith(el("p", "msg err", "This recording couldn't load. It may have been deleted.")); }; }
+    v.className = r.kind === "audio" ? "audio" : "";
+    card.append(v);
+
+    const lbl = el("label", "lbl"); lbl.htmlFor = "tr_" + r.id;
+    lbl.append(document.createTextNode("Transcript"));
+    const words = text(r.transcript).split(/\s+/).filter(Boolean).length;
+    lbl.append(el("span", "", words ? `${words} words${r.transcriptSource === "claude" ? " · transcribed by Claude" : ""}` : "none yet"));
+    card.append(lbl);
+    const ta = document.createElement("textarea"); ta.id = "tr_" + r.id; ta.dataset.rec = r.id; ta.rows = 4;
+    ta.placeholder = "Paste a transcript here, or ask Claude in chat: \"Transcribe my new STARR recordings.\"";
+    ta.value = saved[r.id] != null ? saved[r.id] : (r.transcript || "");
+    if (saved[r.id] != null) ta.dataset.dirty = "1";
+    ta.readOnly = !canWrite;
+    card.append(ta);
+
+    const row = el("div", "row");
+    const msgEl = el("span", "msg", recMsgs.get(r.id) || "");
+    const setMsg = (m) => { recMsgs.set(r.id, m); msgEl.textContent = m; };
+    if (canWrite) {
+      const saveT = el("button", "btn small", "Save transcript"); saveT.type = "button";
+      saveT.disabled = !ta.dataset.dirty;
+      ta.oninput = () => { ta.dataset.dirty = "1"; saveT.disabled = false; };
+      saveT.onclick = async () => {
+        if (recBusy.has(r.id + ":t")) return; recBusy.add(r.id + ":t"); saveT.disabled = true; setMsg("Saving transcript…");
+        try { await db.collection("recordings").doc(r.id).update({ transcript: text(ta.value), transcriptSource: "pasted" }); delete ta.dataset.dirty; setMsg("Transcript saved."); }
+        catch { setMsg("Couldn't save the transcript."); saveT.disabled = false; }
+        finally { recBusy.delete(r.id + ":t"); }
+      };
+      row.append(saveT);
+    }
+    if (sample && canWrite) {
+      const busy = recBusy.has(r.id);
+      const fbBtn = el("button", "btn small primary", busy ? "Getting feedback…" : (r.feedback ? "Redo feedback" : "Get feedback")); fbBtn.type = "button";
+      const hasT = !!text(r.transcript);
+      fbBtn.disabled = busy || !hasT;
+      fbBtn.title = hasT ? "" : "Save a transcript first";
+      fbBtn.onclick = () => getFeedback(r, setMsg);
+      row.append(fbBtn);
+      if (busy) { const stop = el("button", "btn small", "Stop"); stop.type = "button"; stop.onclick = () => { const c = fbCtl.get(r.id); if (c) c.abort(); }; row.append(stop); }
+      if (!hasT && !msgEl.textContent) msgEl.textContent = "Feedback needs a saved transcript.";
+    }
+    row.append(msgEl);
+    if (assets && canWrite) {
+      const sp = el("span"); sp.style.flex = "1"; row.append(sp);
+      const del = el("button", "btn small danger", recDelArmed.has(r.id) ? "Select again to delete" : "Delete take"); del.type = "button";
+      del.onclick = async () => {
+        if (!recDelArmed.has(r.id)) { recDelArmed.set(r.id, setTimeout(() => { recDelArmed.delete(r.id); renderRecordings(); }, 4000)); renderRecordings(); return; }
+        clearTimeout(recDelArmed.get(r.id)); recDelArmed.delete(r.id);
+        try { await removeRecording(r); toast("Take deleted"); } catch { setMsg("Couldn't delete this take."); }
+      };
+      row.append(del);
+    }
+    card.append(row);
+    if (r.feedback && typeof r.feedback === "object") card.append(renderFeedback(r.feedback, r.feedbackAt));
+    wrap.append(card);
+  });
+  if (focusedId && $(focusedId)) $(focusedId).focus();
+}
+
+function applyWriteGate() {
+  $("newBtn").hidden = !canWrite;
+  $("saveBtn").hidden = !canWrite;
+  if (!canWrite) $("delBtn").hidden = true;
+}
+
+// ----- drawing in the sand -----
+const sand = {
+  cv: $("sandCv"), live: $("sandLive"), root: $("sea"), parts: [], drawing: false, last: null, raf: 0, fadeRaf: 0, r: 9,
+  fit() {
+    const c = this.cv, l = this.live, w = this.root.clientWidth, h = this.root.clientHeight;
+    if (!w || !h) return;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const W = Math.round(w * dpr), H = Math.round(h * dpr);
+    if (c.width === W && c.height === H) return;
+    const keep = document.createElement("canvas"); keep.width = c.width; keep.height = c.height;
+    keep.getContext("2d").drawImage(c, 0, 0);
+    c.width = W; c.height = H; l.width = W; l.height = H;
+    const x = c.getContext("2d"); x.drawImage(keep, 0, 0); x.setTransform(dpr, 0, 0, dpr, 0, 0);
+    l.getContext("2d").setTransform(dpr, 0, 0, dpr, 0, 0);
+  },
+  pt(e) { const b = this.cv.getBoundingClientRect(); return { x: e.clientX - b.left, y: e.clientY - b.top }; },
+  circle(x, cx, cy, r) { x.beginPath(); x.arc(cx, cy, r, 0, Math.PI * 2); x.fill(); },
+  dab(q, dir) {
+    const x = this.cv.getContext("2d"), r = this.r, nx = -dir.y, ny = dir.x;
+    for (const s of [-1, 1]) {
+      const cx = q.x + nx * s * (r + 3), cy = q.y + ny * s * (r + 3);
+      x.fillStyle = "rgba(92,66,30,0.035)"; this.circle(x, cx + 2, cy + 2, r * 0.5);
+      x.fillStyle = "rgba(255,243,212,0.075)"; this.circle(x, cx - 1, cy - 1, r * 0.5);
+    }
+    x.fillStyle = "rgba(128,98,56,0.06)"; this.circle(x, q.x, q.y, r);
+    x.fillStyle = "rgba(70,48,20,0.08)"; this.circle(x, q.x - r * 0.3, q.y - r * 0.3, r * 0.7);
+    x.fillStyle = "rgba(255,244,214,0.07)"; this.circle(x, q.x + r * 0.4, q.y + r * 0.4, r * 0.45);
+  },
+  spawn(q, dir, speed) {
+    const r = this.r, nx = -dir.y, ny = dir.x;
+    const pal = ["#6f5530", "#8f7040", "#b08f58", "#cdb27c", "#e7d4a6", "#f6ead0", "#fff7e2", "#9a4f2b"];
+    const k = 1 + Math.floor(Math.random() * 3);
+    for (let i = 0; i < k; i++) {
+      const s = Math.random() < 0.5 ? -1 : 1, off = r * (0.3 + Math.random() * 0.7);
+      const push = 0.5 + Math.random() * 1.6 + Math.min(speed, 40) * 0.05;
+      this.parts.push({
+        x: q.x + nx * s * off + (Math.random() - 0.5) * 2, y: q.y + ny * s * off + (Math.random() - 0.5) * 2,
+        vx: nx * s * push + dir.x * Math.random() * 1.2, vy: ny * s * push + dir.y * Math.random() * 1.2,
+        c: pal[Math.floor(Math.random() * pal.length)], z: 0.6 + Math.random() * 1.5
+      });
+    }
+    if (this.parts.length > 2500) this.bake(this.parts.splice(0, this.parts.length - 2500));
+  },
+  grain(x, p) {
+    x.fillStyle = "rgba(60,40,14,0.28)"; this.circle(x, p.x + p.z * 0.45, p.y + p.z * 0.45, p.z * 0.6);
+    x.fillStyle = p.c; this.circle(x, p.x, p.y, p.z * 0.6);
+  },
+  bake(list) { const x = this.cv.getContext("2d"); for (const p of list) this.grain(x, p); },
+  clearLive() { const lx = this.live.getContext("2d"); lx.save(); lx.setTransform(1, 0, 0, 1, 0, 0); lx.clearRect(0, 0, this.live.width, this.live.height); lx.restore(); },
+  tick() {
+    this.raf = 0; this.clearLive();
+    const lx = this.live.getContext("2d"), still = [], moving = [];
+    for (const p of this.parts) {
+      p.x += p.vx; p.y += p.vy; p.vx *= 0.82; p.vy *= 0.82;
+      (Math.abs(p.vx) + Math.abs(p.vy) < 0.05 ? still : moving).push(p);
+    }
+    if (still.length) this.bake(still);
+    for (const p of moving) this.grain(lx, p);
+    this.parts = moving;
+    if (moving.length) this.raf = requestAnimationFrame(() => this.tick());
+  },
+  smooth() {
+    this.parts = []; this.clearLive(); cancelAnimationFrame(this.fadeRaf);
+    const c = this.cv; let n = 0;
+    const step = () => {
+      const x = c.getContext("2d"); x.save(); x.setTransform(1, 0, 0, 1, 0, 0); n += 1;
+      if (n >= 28) x.clearRect(0, 0, c.width, c.height);
+      else { x.globalCompositeOperation = "destination-out"; x.fillStyle = "rgba(0,0,0,0.16)"; x.fillRect(0, 0, c.width, c.height); }
+      x.restore();
+      if (n < 28) this.fadeRaf = requestAnimationFrame(step);
+    };
+    step();
+  }
+};
+sand.cv.addEventListener("pointerdown", (e) => {
+  if (e.pointerType === "mouse" && e.button !== 0) return;
+  e.preventDefault(); sand.fit(); sand.drawing = true; sand.last = sand.pt(e);
+  try { sand.cv.setPointerCapture(e.pointerId); } catch {}
+  sand.dab(sand.last, { x: 1, y: 0 });
+});
+sand.cv.addEventListener("pointermove", (e) => {
+  if (!sand.drawing) return;
+  const p = sand.pt(e), q0 = sand.last, dx = p.x - q0.x, dy = p.y - q0.y, d = Math.hypot(dx, dy);
+  if (d < 1.5) return;
+  const dir = { x: dx / d, y: dy / d }, n = Math.ceil(d / 2.5);
+  for (let i = 1; i <= n; i++) { const q = { x: q0.x + dx * i / n, y: q0.y + dy * i / n }; sand.dab(q, dir); sand.spawn(q, dir, d); }
+  sand.last = p;
+  if (!sand.raf) sand.raf = requestAnimationFrame(() => sand.tick());
+});
+["pointerup", "pointercancel"].forEach(ev => sand.cv.addEventListener(ev, () => { sand.drawing = false; }));
+$("smoothBtn").onclick = () => sand.smooth();
+if (window.ResizeObserver) new ResizeObserver(() => sand.fit()).observe(sand.root);
+sand.fit();
+
+// ----- dive intro -----
+const intro = $("intro");
+let introTimer = 0;
+const reducedMotion = () => !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+function endIntro() { clearTimeout(introTimer); intro.classList.remove("play"); intro.hidden = true; }
+function playIntro() {
+  if (reducedMotion()) { endIntro(); return; }
+  clearTimeout(introTimer);
+  intro.classList.remove("play"); intro.hidden = false; void intro.offsetWidth; intro.classList.add("play");
+  introTimer = setTimeout(endIntro, 3640);
+}
+$("skipBtn").onclick = endIntro;
+$("replayBtn").onclick = () => { window.scrollTo({ top: 0 }); playIntro(); };
+let seenDive = false;
+try { seenDive = sessionStorage.getItem("starrDiveSeen") === "1"; sessionStorage.setItem("starrDiveSeen", "1"); } catch {}
+if (!seenDive) playIntro();
+
+// ----- boot -----
+render();
+$("assist").hidden = true;
+$("uploadBox").hidden = true;
+(async () => {
+  const c = window.claude;
+  if (!c || !c.use) { loadFailed = true; notice("Open this page from your claude.ai artifacts to save and load stories."); $("newBtn").hidden = true; render(); return; }
+  const [d, s, a, u] = await Promise.all([c.use("db"), c.use("sample"), c.use("assets"), c.use("user")]);
+  db = d; sample = s; assets = a;
+  $("assist").hidden = !sample;
+  if (u) { const w = await u.can("data.write"); if (w === false) canWrite = false; }
+  applyWriteGate();
+  if (!db) { loadFailed = true; notice("Stories can't load in this view. Sign in to claude.ai and open the page from your artifacts."); $("newBtn").hidden = true; render(); return; }
+  if (!canWrite) notice("You have view-only access. You can read the stories but not change them.");
+  const onErr = (err) => {
+    if (err && err.code === "revoked") notice("Access to this story bank changed. Reload to continue.");
+    else notice("Lost the live connection to your stories. Reload the page.");
+  };
+  db.collection("stories").onSnapshot(snap => {
+    loaded = true;
+    stories = snap.docs.map(x => ({ id: x.id, ...x.data() }));
+    render();
+  }, onErr);
+  db.collection("recordings").onSnapshot(snap => {
+    recordings = snap.docs.map(x => ({ id: x.id, ...x.data() }));
+    render();
+    if (!$("drawer").hidden) renderRecordings();
+  }, onErr);
+})();
+</script>

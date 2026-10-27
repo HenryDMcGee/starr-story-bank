@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>STARR Story Bank on the seafloor</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+body{margin:0;background:#cdb88a}
+a{color:#0f4c5c}a:hover{color:#0a3440}
+@keyframes drift1{0%{transform:translate(0,0) scale(1)}50%{transform:translate(-40px,26px) scale(1.04)}100%{transform:translate(0,0) scale(1)}}
+@keyframes drift2{0%{transform:translate(0,0)}50%{transform:translate(36px,-22px)}100%{transform:translate(0,0)}}
+@keyframes swim{0%{transform:translate(0,0) rotate(-8deg)}100%{transform:translate(-220px,40px) rotate(-14deg)}}
+@keyframes introWater{0%,48%{opacity:1}100%{opacity:0}}
+@keyframes introCaption{0%,45%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-16px)}}
+@keyframes diverDown{0%{transform:translate(10px,-170px) scale(1.45);opacity:1}35%{transform:translate(-46px,170px) scale(1.05);opacity:1}68%{transform:translate(22px,410px) scale(.7);opacity:1}100%{transform:translate(0,600px) scale(.42);opacity:0}}
+@keyframes bubbleUp{0%{transform:translate(0,0) scale(.6);opacity:0}15%{opacity:.95}100%{transform:translate(14px,-150px) scale(1.1);opacity:0}}
+@keyframes rays{0%,100%{transform:skewX(-12deg);opacity:.5}50%{transform:skewX(-5deg);opacity:.9}}
+@keyframes surface{0%,100%{background-position:0 0}50%{background-position:110px 8px}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important}}
+@media (max-width: 640px){
+.story-table{min-width:0!important}
+.story-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.story-table,.story-table tbody{display:block;width:100%}
+.story-table tr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 16px;padding:16px;border-bottom:1px solid #c9cfd4}
+.story-table tr:last-child{border-bottom:0}
+.story-table td{display:block;padding:0!important;border:0!important;white-space:normal!important}
+.story-table td:nth-child(1),.story-table td:nth-child(2){grid-column:1/-1}
+.story-table td:nth-child(1){font-size:16px;font-weight:600!important}
+.story-table td::before{display:block;font-size:12px;font-weight:600;color:#3d4a54;margin-bottom:2px}
+.story-table td:nth-child(1)::before{content:"Interview prompt"}
+.story-table td:nth-child(2)::before{content:"Story"}
+.story-table td:nth-child(3)::before{content:"Competency"}
+.story-table td:nth-child(4)::before{content:"STARR"}
+.story-table td:nth-child(5)::before{content:"Practice"}
+.story-table td:nth-child(6)::before{content:"Status"}
+}
+</style>
+</helmet>
+
+<div ref="{{setRoot}}" style="position: relative; min-height: 1240px; overflow: hidden; background: #d6bf8f; font-family: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif; color: #1d2a30;">
+
+  <!-- Sand: rippled relief + grain -->
+  <svg aria-hidden="true" style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;">
+    <filter id="ripples" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.0045 0.045" numOctaves="2" seed="7" result="n"></feTurbulence>
+      <feDiffuseLighting in="n" lighting-color="#f1e0b8" surfaceScale="5" result="lit">
+        <feDistantLight azimuth="235" elevation="52"></feDistantLight>
+      </feDiffuseLighting>
+      <feComposite in="lit" in2="SourceGraphic" operator="in"></feComposite>
+    </filter>
+    <filter id="mottle" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="3" seed="11"></feTurbulence>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.6  0 0 0 0 0.48  0 0 0 0 0.3  0 0 0 1.2 -0.5"></feColorMatrix>
+      <feComposite in2="SourceGraphic" operator="in"></feComposite>
+    </filter>
+    <filter id="grainDark" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="1" seed="5"></feTurbulence>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.34  0 0 0 0 0.26  0 0 0 0 0.14  1 0 0 0 0"></feColorMatrix>
+      <feComponentTransfer><feFuncA type="discrete" tableValues="0 0 0 0 0 0.9 1"></feFuncA></feComponentTransfer>
+      <feComposite in2="SourceGraphic" operator="in"></feComposite>
+    </filter>
+    <filter id="grainLight" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="1" seed="9"></feTurbulence>
+      <feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 0.97  0 0 0 0 0.86  1 0 0 0 0"></feColorMatrix>
+      <feComponentTransfer><feFuncA type="discrete" tableValues="0 0 0 0 0 0.85 1"></feFuncA></feComponentTransfer>
+      <feComposite in2="SourceGraphic" operator="in"></feComposite>
+    </filter>
+    <filter id="grainRust" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="1" seed="21"></feTurbulence>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.66  0 0 0 0 0.4  0 0 0 0 0.2  1 0 0 0 0"></feColorMatrix>
+      <feComponentTransfer><feFuncA type="discrete" tableValues="0 0 0 0 0 0 0 1"></feFuncA></feComponentTransfer>
+      <feComposite in2="SourceGraphic" operator="in"></feComposite>
+    </filter>
+    <filter id="grainCoarse" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.32" numOctaves="1" seed="14"></feTurbulence>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.42  0 0 0 0 0.33  0 0 0 0 0.2  1 0 0 0 0"></feColorMatrix>
+      <feComponentTransfer><feFuncA type="discrete" tableValues="0 0 0 0 0 0 0 0 1"></feFuncA></feComponentTransfer>
+      <feComposite in2="SourceGraphic" operator="in"></feComposite>
+    </filter>
+    <rect width="100%" height="100%" fill="#d6bf8f" filter="url(#ripples)" opacity="0.85"></rect>
+    <rect width="100%" height="100%" fill="#000" filter="url(#mottle)" opacity="0.35"></rect>
+    <rect width="100%" height="100%" fill="#000" filter="url(#grainCoarse)" opacity="0.4"></rect>
+    <rect width="100%" height="100%" fill="#000" filter="url(#grainDark)" opacity="0.6"></rect>
+    <rect width="100%" height="100%" fill="#000" filter="url(#grainRust)" opacity="0.55"></rect>
+    <rect width="100%" height="100%" fill="#000" filter="url(#grainLight)" opacity="0.75"></rect>
+  </svg>
+
+  <!-- Drawable sand: grooves and settled grains, plus a layer for grains still sliding -->
+  <canvas ref="{{setCv}}" role="img" aria-label="Sand you can draw in. Hold the mouse button and drag." onPointerDown="{{down}}" onPointerMove="{{move}}" onPointerUp="{{up}}" onPointerCancel="{{up}}" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; z-index: 1; cursor: crosshair; touch-action: none;"></canvas>
+  <canvas ref="{{setLive}}" aria-hidden="true" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none;"></canvas>
+
+  <!-- Seafloor objects -->
+  <svg aria-hidden="true" viewBox="0 0 120 120" style="position: absolute; z-index: 2; pointer-events: none; top: 300px; right: 7%; width: 92px; height: 92px; transform: rotate(18deg); filter: drop-shadow(6px 9px 6px rgba(70,50,20,.35));">
+    <path d="M60 6 L73 44 L114 46 L82 70 L93 110 L60 87 L27 110 L38 70 L6 46 L47 44 Z" fill="#e0663d" stroke="#c4532e" stroke-width="5" stroke-linejoin="round"></path>
+    <circle cx="60" cy="58" r="4" fill="#f4a07f"></circle><circle cx="60" cy="32" r="2.5" fill="#f4a07f"></circle><circle cx="86" cy="52" r="2.5" fill="#f4a07f"></circle><circle cx="34" cy="52" r="2.5" fill="#f4a07f"></circle><circle cx="76" cy="84" r="2.5" fill="#f4a07f"></circle><circle cx="44" cy="84" r="2.5" fill="#f4a07f"></circle>
+  </svg>
+  <svg aria-hidden="true" viewBox="0 0 100 90" style="position: absolute; z-index: 2; pointer-events: none; bottom: 70px; left: 5%; width: 74px; height: 66px; transform: rotate(-24deg); filter: drop-shadow(5px 7px 5px rgba(70,50,20,.35));">
+    <path d="M50 86 C20 86 4 60 6 40 C8 18 30 4 50 4 C70 4 92 18 94 40 C96 60 80 86 50 86 Z" fill="#f2e6d6" stroke="#d8c5ad" stroke-width="2"></path>
+    <path d="M50 84 L50 8 M50 84 L30 10 M50 84 L70 10 M50 84 L14 24 M50 84 L86 24 M50 84 L8 44 M50 84 L92 44" stroke="#d8c5ad" stroke-width="2" fill="none"></path>
+  </svg>
+  <svg aria-hidden="true" viewBox="0 0 60 30" style="position: absolute; z-index: 2; pointer-events: none; top: 640px; left: 47%; width: 44px; height: 22px; transform: rotate(32deg); filter: drop-shadow(3px 5px 3px rgba(70,50,20,.3));">
+    <ellipse cx="30" cy="15" rx="28" ry="12" fill="#7d8b8f"></ellipse>
+  </svg>
+
+  <!-- Content lying in the sand -->
+  <div style="position: relative; pointer-events: none; max-width: 1240px; margin: 0 auto; padding: 56px 40px 120px; display: flex; flex-direction: column; gap: 34px;">
+
+    <header style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end; justify-content: space-between;">
+      <div style="display: flex; flex-direction: column; gap: 4px; transform: rotate(-1.2deg);">
+        <h1 style="margin: 0; font-family: 'Kalam', 'Comic Sans MS', cursive; font-weight: 700; font-size: 64px; line-height: 1; color: #a8895a; text-shadow: 2px 2px 0 rgba(255,244,214,.75), -1px -2px 1px rgba(90,64,28,.45);">STARR Story Bank</h1>
+        <p style="margin: 0; font-family: 'Kalam', 'Comic Sans MS', cursive; font-size: 22px; color: #9a7d50; text-shadow: 1px 1px 0 rgba(255,244,214,.7), -1px -1px 0 rgba(90,64,28,.35);">written in the sand, one story per prompt</p>
+      </div>
+      <button type="button" style="position: relative; z-index: 2; pointer-events: auto; font: 600 15px 'IBM Plex Sans', system-ui, sans-serif; min-height: 48px; padding: 12px 26px; border: 3px solid #fff3e8; border-radius: 999px; background: #e0663d; color: #ffffff; box-shadow: 8px 12px 14px rgba(80,55,20,.35), inset 0 -4px 0 rgba(0,0,0,.12); cursor: pointer; transform: rotate(2deg);">+ New story</button>
+    </header>
+
+    <!-- KPIs as sea-glass pebbles -->
+    <section aria-label="Summary" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 22px;">
+      <div style="position: relative; z-index: 2; pointer-events: auto; background: rgba(214,236,229,.9); border-radius: 26px 30px 24px 32px; padding: 18px 20px; box-shadow: 10px 14px 16px rgba(80,58,24,.32), inset 0 2px 0 rgba(255,255,255,.7); transform: rotate(-2deg);">
+        <div style="font-size: 12px; color: #2f5550;">Stories</div>
+        <div style="font: 700 34px/1.1 'IBM Plex Sans', sans-serif; color: #12343a;">2</div>
+        <div style="font-size: 12px; color: #2f5550;">2 distinct prompts</div>
+      </div>
+      <div style="position: relative; z-index: 2; pointer-events: auto; background: rgba(214,229,239,.9); border-radius: 30px 24px 32px 26px; padding: 18px 20px; box-shadow: 10px 14px 16px rgba(80,58,24,.32), inset 0 2px 0 rgba(255,255,255,.7); transform: rotate(1.5deg) translateY(8px);">
+        <div style="font-size: 12px; color: #2c4b5c;">Ready or practiced</div>
+        <div style="font: 700 34px/1.1 'IBM Plex Sans', sans-serif; color: #12343a;">0</div>
+        <div style="font-size: 12px; color: #2c4b5c;">2 still drafts</div>
+      </div>
+      <div style="position: relative; z-index: 2; pointer-events: auto; background: rgba(241,227,201,.92); border-radius: 24px 32px 26px 28px; padding: 18px 20px; box-shadow: 10px 14px 16px rgba(80,58,24,.32), inset 0 2px 0 rgba(255,255,255,.7); transform: rotate(-0.8deg);">
+        <div style="font-size: 12px; color: #5c4826;">Competencies covered</div>
+        <div style="font: 700 34px/1.1 'IBM Plex Sans', sans-serif; color: #3a2c12;">2<span style="font-size: 16px; font-weight: 500; color: #5c4826;"> / 8</span></div>
+        <div style="font-size: 12px; color: #5c4826;">missing Leadership, Customer focus…</div>
+      </div>
+      <div style="position: relative; z-index: 2; pointer-events: auto; background: rgba(214,236,229,.9); border-radius: 32px 26px 28px 24px; padding: 18px 20px; box-shadow: 10px 14px 16px rgba(80,58,24,.32), inset 0 2px 0 rgba(255,255,255,.7); transform: rotate(2.4deg) translateY(4px);">
+        <div style="font-size: 12px; color: #2f5550;">STARR completeness</div>
+        <div style="font: 700 34px/1.1 'IBM Plex Sans', sans-serif; color: #12343a;">0%</div>
+        <div style="font-size: 12px; color: #2f5550;">fields filled, no placeholders</div>
+      </div>
+      <div style="position: relative; z-index: 2; pointer-events: auto; background: rgba(214,229,239,.9); border-radius: 26px 28px 32px 24px; padding: 18px 20px; box-shadow: 10px 14px 16px rgba(80,58,24,.32), inset 0 2px 0 rgba(255,255,255,.7); transform: rotate(-1.6deg) translateY(10px);">
+        <div style="font-size: 12px; color: #2c4b5c;">Practice takes</div>
+        <div style="font: 700 34px/1.1 'IBM Plex Sans', sans-serif; color: #12343a;">0</div>
+        <div style="font-size: 12px; color: #2c4b5c;">no recordings yet</div>
+      </div>
+    </section>
+
+    <!-- Coverage slate + Needs-work note -->
+    <section style="display: flex; flex-wrap: wrap; gap: 30px; align-items: flex-start;">
+      <div style="z-index: 2; pointer-events: auto; flex: 999 1 560px; min-width: 0; background: #34454b; border-radius: 14px 18px 12px 20px; padding: 22px 24px; box-shadow: 14px 18px 20px rgba(70,50,20,.4), inset 0 1px 0 rgba(255,255,255,.12); transform: rotate(-0.7deg); color: #e9f1f0; position: relative;">
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 16px;">
+          <h2 style="margin: 0; font: 700 18px 'IBM Plex Sans', sans-serif;">Coverage by competency</h2>
+          <span style="font-size: 12px; color: #b9cdd0;">ready / practiced · draft</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px; font-size: 13px;">
+          <div style="display: grid; grid-template-columns: 150px minmax(0, 1fr) 24px; gap: 10px; align-items: center;"><span style="color: #b9cdd0;">Leadership</span><span style="height: 12px; border-radius: 6px; background: rgba(255,255,255,.1);"></span><span style="font: 500 12px 'IBM Plex Mono', monospace; color: #f4a07f; text-align: right;">0</span></div>
+          <div style="display: grid; grid-template-columns: 150px minmax(0, 1fr) 24px; gap: 10px; align-items: center;"><span>Ownership</span><span style="height: 12px; border-radius: 6px; background: rgba(255,255,255,.1); display: flex;"><span style="width: 33%; border-radius: 6px; background: #8fc4c9;"></span></span><span style="font: 500 12px 'IBM Plex Mono', monospace; text-align: right;">1</span></div>
+          <div style="display: grid; grid-template-columns: 150px minmax(0, 1fr) 24px; gap: 10px; align-items: center;"><span style="color: #b9cdd0;">Customer focus</span><span style="height: 12px; border-radius: 6px; background: rgba(255,255,255,.1);"></span><span style="font: 500 12px 'IBM Plex Mono', monospace; color: #f4a07f; text-align: right;">0</span></div>
+          <div style="display: grid; grid-template-columns: 150px minmax(0, 1fr) 24px; gap: 10px; align-items: center;"><span style="color: #b9cdd0;">Data &amp; analysis</span><span style="height: 12px; border-radius: 6px; background: rgba(255,255,255,.1);"></span><span style="font: 500 12px 'IBM Plex Mono', monospace; color: #f4a07f; text-align: right;">0</span></div>
+          <div style="display: grid; grid-template-columns: 150px minmax(0, 1fr) 24px; gap: 10px; align-items: center;"><span style="color: #b9cdd0;">Ambiguity</span><span style="height: 12px; border-radius: 6px; background: rgba(255,255,255,.1);"></span><span style="font: 500 12px 'IBM Plex Mono', monospace; color: #f4a07f; text-align: right;">0</span></div>
+          <div style="display: grid; grid-template-columns: 150px minmax(0, 1fr) 24px; gap: 10px; align-items: center;"><span>Influence &amp; conflict</span><span style="height: 12px; border-radius: 6px; background: rgba(255,255,255,.1); display: flex;"><span style="width: 33%; border-radius: 6px; background: #8fc4c9;"></span></span><span style="font: 500 12px 'IBM Plex Mono', monospace; text-align: right;">1</span></div>
+          <div style="display: grid; grid-template-columns: 150px minmax(0, 1fr) 24px; gap: 10px; align-items: center;"><span style="color: #b9cdd0;">Failure &amp; learning</span><span style="height: 12px; border-radius: 6px; background: rgba(255,255,255,.1);"></span><span style="font: 500 12px 'IBM Plex Mono', monospace; color: #f4a07f; text-align: right;">0</span></div>
+          <div style="display: grid; grid-template-columns: 150px minmax(0, 1fr) 24px; gap: 10px; align-items: center;"><span style="color: #b9cdd0;">Technical depth</span><span style="height: 12px; border-radius: 6px; background: rgba(255,255,255,.1);"></span><span style="font: 500 12px 'IBM Plex Mono', monospace; color: #f4a07f; text-align: right;">0</span></div>
+        </div>
+        <div aria-hidden="true" style="position: absolute; right: -18px; bottom: -22px; width: 240px; height: 90px; border-radius: 50%; background: radial-gradient(closest-side, rgba(214,191,143,.98), rgba(214,191,143,.85) 55%, rgba(214,191,143,0));"></div>
+      </div>
+    </section>
+
+    <!-- Search bar as a rope-tied plank -->
+    <div style="position: relative; z-index: 2; pointer-events: auto; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; transform: rotate(-0.4deg);">
+      <label for="seafloorSearch" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);">Search stories</label>
+      <input id="seafloorSearch" type="search" placeholder="Search prompts, titles, story text" style="flex: 1 1 260px; min-width: 0; min-height: 46px; font: 14px 'IBM Plex Sans', sans-serif; padding: 10px 16px; border: 2px solid #b89c6a; border-radius: 999px; background: rgba(250,244,228,.92); color: #1d2a30; box-shadow: 6px 9px 10px rgba(70,50,20,.25);">
+      <button type="button" style="min-height: 46px; font: 500 14px 'IBM Plex Sans', sans-serif; padding: 10px 16px; border: 2px solid #b89c6a; border-radius: 999px; background: rgba(250,244,228,.92); color: #1d2a30; box-shadow: 6px 9px 10px rgba(70,50,20,.25);">All competencies</button>
+      <button type="button" style="min-height: 46px; font: 500 14px 'IBM Plex Sans', sans-serif; padding: 10px 16px; border: 2px solid #b89c6a; border-radius: 999px; background: rgba(250,244,228,.92); color: #1d2a30; box-shadow: 6px 9px 10px rgba(70,50,20,.25);">All statuses</button>
+    </div>
+
+    <!-- Story table as a driftwood board, resting on a bank of sand -->
+    <div style="position: relative;">
+    <svg aria-hidden="true" viewBox="0 0 1000 400" preserveAspectRatio="none" style="position: absolute; left: -64px; top: -34px; width: calc(100% + 136px); height: calc(100% + 110px); pointer-events: none; overflow: visible;">
+      <defs>
+        <radialGradient id="moundFill" cx="48%" cy="52%" r="56%">
+          <stop offset="0%" stop-color="#ecdbb2"></stop>
+          <stop offset="62%" stop-color="#e2cd9f"></stop>
+          <stop offset="88%" stop-color="#d9c294" stop-opacity="0.85"></stop>
+          <stop offset="100%" stop-color="#d6bf8f" stop-opacity="0"></stop>
+        </radialGradient>
+        <radialGradient id="moundShade" cx="78%" cy="92%" r="40%">
+          <stop offset="0%" stop-color="#8a6c3c" stop-opacity="0.32"></stop>
+          <stop offset="100%" stop-color="#8a6c3c" stop-opacity="0"></stop>
+        </radialGradient>
+        <clipPath id="moundClip"><path d="M36 214 C24 118 118 36 300 26 C482 14 724 18 884 46 C978 66 998 170 984 254 C968 344 862 390 640 394 C418 400 176 396 86 344 C40 316 42 262 36 214 Z"></path></clipPath>
+      </defs>
+      <path d="M36 214 C24 118 118 36 300 26 C482 14 724 18 884 46 C978 66 998 170 984 254 C968 344 862 390 640 394 C418 400 176 396 86 344 C40 316 42 262 36 214 Z" fill="url(#moundFill)"></path>
+      <path d="M36 214 C24 118 118 36 300 26 C482 14 724 18 884 46 C978 66 998 170 984 254 C968 344 862 390 640 394 C418 400 176 396 86 344 C40 316 42 262 36 214 Z" fill="url(#moundShade)"></path>
+      <g clip-path="url(#moundClip)">
+        <rect width="1000" height="400" fill="#000" filter="url(#grainCoarse)" opacity="0.35"></rect>
+        <rect width="1000" height="400" fill="#000" filter="url(#grainDark)" opacity="0.55"></rect>
+        <rect width="1000" height="400" fill="#000" filter="url(#grainRust)" opacity="0.5"></rect>
+        <rect width="1000" height="400" fill="#000" filter="url(#grainLight)" opacity="0.8"></rect>
+      </g>
+    </svg>
+    <div style="position: relative; z-index: 7; pointer-events: auto; border-radius: 8px; background: #ffffff; border: 1px solid #c9cfd4; box-shadow: 0 8px 20px rgba(40,30,10,.22); overflow: hidden;">
+      <div style="overflow-x: auto;">
+        <table class="story-table" style="width: 100%; min-width: 860px; border-collapse: collapse; font: 15px/1.45 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif; color: #111a20;">
+          <thead>
+            <tr style="background: #f1f3f5;">
+              <th style="text-align: left; padding: 12px 16px; border-bottom: 1px solid #c9cfd4; font-size: 13px; font-weight: 600; color: #3d4a54; width: 34%;">Interview prompt</th>
+              <th style="text-align: left; padding: 12px 16px; border-bottom: 1px solid #c9cfd4; font-size: 13px; font-weight: 600; color: #3d4a54;">Story</th>
+              <th style="text-align: left; padding: 12px 16px; border-bottom: 1px solid #c9cfd4; font-size: 13px; font-weight: 600; color: #3d4a54;">Competency</th>
+              <th style="text-align: left; padding: 12px 16px; border-bottom: 1px solid #c9cfd4; font-size: 13px; font-weight: 600; color: #3d4a54;">STARR</th>
+              <th style="text-align: left; padding: 12px 16px; border-bottom: 1px solid #c9cfd4; font-size: 13px; font-weight: 600; color: #3d4a54;">Practice</th>
+              <th style="text-align: left; padding: 12px 16px; border-bottom: 1px solid #c9cfd4; font-size: 13px; font-weight: 600; color: #3d4a54;">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr id="story-internship">
+              <td style="padding: 14px 16px; border-bottom: 1px solid #e3e7ea; vertical-align: top; font-weight: 500;">Tell me about a time you took ownership of a problem outside your role.</td>
+              <td style="padding: 14px 16px; border-bottom: 1px solid #e3e7ea; vertical-align: top;">Internship Watch, a tool for MBA classmates</td>
+              <td style="padding: 14px 16px; border-bottom: 1px solid #e3e7ea; vertical-align: top;">Ownership</td>
+              <td style="padding: 14px 16px; border-bottom: 1px solid #e3e7ea; vertical-align: top; white-space: nowrap;">0 of 5 done<br><span style="font-size: 13px; color: #8a4510;">5 placeholders</span></td>
+              <td style="padding: 14px 16px; border-bottom: 1px solid #e3e7ea; vertical-align: top; color: #4f5b64;">None yet</td>
+              <td style="padding: 14px 16px; border-bottom: 1px solid #e3e7ea; vertical-align: top; font-weight: 600; color: #8a5300;">Draft</td>
+            </tr>
+            <tr id="story-cisco">
+              <td style="padding: 14px 16px; vertical-align: top; font-weight: 500;">Tell me about a time you simplified something complex.</td>
+              <td style="padding: 14px 16px; vertical-align: top;">Cisco 2021 hackathon, team took 1st place</td>
+              <td style="padding: 14px 16px; vertical-align: top;">Influence &amp; conflict</td>
+              <td style="padding: 14px 16px; vertical-align: top; white-space: nowrap;">0 of 5 done<br><span style="font-size: 13px; color: #8a4510;">5 placeholders</span></td>
+              <td style="padding: 14px 16px; vertical-align: top; color: #4f5b64;">None yet</td>
+              <td style="padding: 14px 16px; vertical-align: top; font-weight: 600; color: #8a5300;">Draft</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    </div>
+  </div>
+
+  <div style="position: absolute; right: 28px; bottom: 28px; z-index: 6; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: flex-end; pointer-events: none;">
+    <span style="font: 500 13px 'IBM Plex Sans', sans-serif; color: #3a2c12; background: rgba(250,244,228,.88); padding: 8px 14px; border-radius: 999px;">Hold and drag on the sand to draw</span>
+    <button type="button" onClick="{{replayIntro}}" style="pointer-events: auto; min-height: 44px; font: 600 14px 'IBM Plex Sans', sans-serif; padding: 10px 18px; border: 2px solid #b89c6a; border-radius: 999px; background: #f6f0e1; color: #3a2c12; box-shadow: 6px 9px 10px rgba(70,50,20,.3); cursor: pointer;">Replay dive</button>
+    <button type="button" onClick="{{smooth}}" style="pointer-events: auto; min-height: 44px; font: 600 14px 'IBM Plex Sans', sans-serif; padding: 10px 18px; border: 2px solid #b89c6a; border-radius: 999px; background: #f6f0e1; color: #3a2c12; box-shadow: 6px 9px 10px rgba(70,50,20,.3); cursor: pointer;">Smooth the sand</button>
+  </div>
+
+  <!-- Water above: tint, caustic light, a passing fish's shadow -->
+  <div aria-hidden="true" style="position: absolute; inset: 0; z-index: 5; pointer-events: none; background: {{tint}}; mix-blend-mode: multiply;"></div>
+  <sc-if value="{{caustics}}" hint-placeholder-val="{{ true }}">
+    <div aria-hidden="true" style="position: absolute; inset: -80px; z-index: 5; pointer-events: none; mix-blend-mode: soft-light; opacity: .9; animation: drift1 14s ease-in-out infinite; background: radial-gradient(60px 26px at 12% 18%, rgba(255,255,255,.9), transparent 70%), radial-gradient(90px 34px at 34% 9%, rgba(255,255,255,.75), transparent 70%), radial-gradient(70px 30px at 62% 22%, rgba(255,255,255,.85), transparent 70%), radial-gradient(110px 40px at 86% 12%, rgba(255,255,255,.7), transparent 70%), radial-gradient(80px 30px at 22% 46%, rgba(255,255,255,.8), transparent 70%), radial-gradient(120px 36px at 52% 52%, rgba(255,255,255,.7), transparent 70%), radial-gradient(70px 28px at 80% 44%, rgba(255,255,255,.85), transparent 70%), radial-gradient(100px 34px at 10% 76%, rgba(255,255,255,.75), transparent 70%), radial-gradient(80px 30px at 44% 84%, rgba(255,255,255,.8), transparent 70%), radial-gradient(110px 40px at 74% 78%, rgba(255,255,255,.7), transparent 70%), radial-gradient(70px 26px at 94% 92%, rgba(255,255,255,.8), transparent 70%);"></div>
+    <div aria-hidden="true" style="position: absolute; inset: -80px; z-index: 5; pointer-events: none; mix-blend-mode: soft-light; opacity: .7; animation: drift2 11s ease-in-out infinite; background: radial-gradient(90px 20px at 24% 28%, rgba(255,255,255,.8), transparent 70%), radial-gradient(70px 24px at 48% 34%, rgba(255,255,255,.8), transparent 70%), radial-gradient(100px 22px at 70% 62%, rgba(255,255,255,.75), transparent 70%), radial-gradient(80px 22px at 30% 64%, rgba(255,255,255,.8), transparent 70%), radial-gradient(90px 24px at 88% 30%, rgba(255,255,255,.75), transparent 70%), radial-gradient(70px 20px at 60% 92%, rgba(255,255,255,.8), transparent 70%);"></div>
+  </sc-if>
+  <svg aria-hidden="true" viewBox="0 0 160 70" style="position: absolute; z-index: 5; top: 520px; right: 18%; width: 150px; height: 66px; pointer-events: none; opacity: .22; filter: blur(4px); animation: swim 18s linear infinite alternate;">
+    <path d="M10 35 C34 8 92 6 120 35 C92 64 34 62 10 35 Z M118 35 L152 12 L144 35 L152 58 Z" fill="#1c3a3f"></path>
+  </svg>
+  <sc-if value="{{mask}}" hint-placeholder-val="{{ true }}">
+    <div aria-hidden="true" style="position: absolute; inset: 0; z-index: 5; pointer-events: none; background: radial-gradient(130% 110% at 50% 45%, rgba(10,50,60,0) 58%, rgba(10,50,60,.22) 78%, rgba(6,32,40,.55) 100%);"></div>
+    <div aria-hidden="true" style="position: absolute; z-index: 5; top: 34px; right: 38px; display: flex; flex-direction: column; align-items: center; gap: 10px; pointer-events: none;">
+      <span style="width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,.7); background: rgba(255,255,255,.18);"></span>
+      <span style="width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,.65); background: rgba(255,255,255,.15); margin-left: 16px;"></span>
+      <span style="width: 7px; height: 7px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,.7); background: rgba(255,255,255,.18);"></span>
+    </div>
+  </sc-if>
+
+  <!-- Intro: a diver descends from the surface and the water clears to show the sand -->
+  <sc-if value="{{intro}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; inset: 0; z-index: 20; pointer-events: none; overflow: hidden;">
+      <div aria-hidden="true" style="position: absolute; inset: 0; background: linear-gradient(180deg, #a6e1ea 0px, #4fb3c8 260px, #23859e 620px, #186f86 1000px, #135f74 100%); animation: introWater 3.36s ease-in forwards;">
+        <div style="position: absolute; left: 0; right: 0; top: 0; height: 96px; background-image: radial-gradient(60px 12px at 50% 50%, rgba(255,255,255,.75), rgba(255,255,255,0) 70%); background-size: 170px 34px; animation: surface 3.4s ease-in-out infinite;"></div>
+        <div style="position: absolute; top: -40px; left: 10%; width: 80px; height: 980px; background: linear-gradient(180deg, rgba(255,255,255,.4), rgba(255,255,255,0)); transform-origin: top; animation: rays 6s ease-in-out infinite;"></div>
+        <div style="position: absolute; top: -40px; left: 34%; width: 46px; height: 860px; background: linear-gradient(180deg, rgba(255,255,255,.35), rgba(255,255,255,0)); transform-origin: top; animation: rays 7s ease-in-out .8s infinite;"></div>
+        <div style="position: absolute; top: -40px; left: 58%; width: 110px; height: 1040px; background: linear-gradient(180deg, rgba(255,255,255,.3), rgba(255,255,255,0)); transform-origin: top; animation: rays 8s ease-in-out .3s infinite;"></div>
+        <div style="position: absolute; top: -40px; left: 82%; width: 60px; height: 900px; background: linear-gradient(180deg, rgba(255,255,255,.35), rgba(255,255,255,0)); transform-origin: top; animation: rays 6.5s ease-in-out 1.2s infinite;"></div>
+      </div>
+      <div style="position: absolute; top: 132px; left: 16px; right: 16px; display: flex; justify-content: center; animation: introCaption 2.24s ease-out forwards;">
+        <p style="margin: 0; font-family: 'Kalam', 'Comic Sans MS', cursive; font-weight: 700; font-size: 36px; text-align: center; color: #ffffff; text-shadow: 0 2px 12px rgba(5,40,50,.55);">Diving down to your stories…</p>
+      </div>
+      <div aria-hidden="true" style="position: absolute; top: 0; left: 50%; width: 0; height: 0; animation: diverDown 3.22s cubic-bezier(.4,.05,.5,1) forwards;">
+        <svg viewBox="0 0 200 90" style="position: absolute; left: -110px; top: -50px; width: 220px; height: 100px; transform: rotate(72deg); filter: drop-shadow(8px 12px 10px rgba(5,40,50,.35));">
+          <path d="M6 20 L40 35 L40 46 L3 40 Z" fill="#f2c14e"></path>
+          <path d="M8 58 L40 48 L42 59 L11 74 Z" fill="#e3ad2f"></path>
+          <rect x="36" y="34" width="62" height="12" rx="6" fill="#1b2b33"></rect>
+          <rect x="36" y="47" width="62" height="12" rx="6" fill="#22343d"></rect>
+          <rect x="88" y="30" width="66" height="30" rx="14" fill="#1b2b33"></rect>
+          <rect x="96" y="16" width="52" height="16" rx="8" fill="#e0663d"></rect>
+          <rect x="140" y="18" width="8" height="12" rx="2" fill="#c9cfd4"></rect>
+          <path d="M146 24 C162 20 176 30 176 50" stroke="#0d1a20" stroke-width="3" fill="none"></path>
+          <circle cx="166" cy="44" r="13" fill="#1b2b33"></circle>
+          <rect x="164" y="36" width="15" height="10" rx="4" fill="#9fd8e0" stroke="#0d1a20" stroke-width="2"></rect>
+          <rect x="140" y="52" width="48" height="9" rx="4.5" fill="#22343d" transform="rotate(18 140 56)"></rect>
+        </svg>
+        <span style="position: absolute; left: 8px; top: 34px; width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,.85); background: rgba(255,255,255,.2); animation: bubbleUp 1.5s ease-out infinite;"></span>
+        <span style="position: absolute; left: 16px; top: 40px; width: 7px; height: 7px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,.85); background: rgba(255,255,255,.2); animation: bubbleUp 1.3s ease-out .35s infinite;"></span>
+        <span style="position: absolute; left: 2px; top: 44px; width: 13px; height: 13px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,.8); background: rgba(255,255,255,.18); animation: bubbleUp 1.7s ease-out .7s infinite;"></span>
+        <span style="position: absolute; left: 12px; top: 30px; width: 6px; height: 6px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,.85); background: rgba(255,255,255,.2); animation: bubbleUp 1.2s ease-out 1s infinite;"></span>
+      </div>
+      <button type="button" onClick="{{skipIntro}}" style="position: absolute; top: 24px; left: 24px; pointer-events: auto; min-height: 44px; font: 600 14px 'IBM Plex Sans', sans-serif; padding: 10px 18px; border: 2px solid rgba(255,255,255,.85); border-radius: 999px; background: rgba(10,60,75,.45); color: #ffffff; cursor: pointer;">Skip intro</button>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"depth":{"editor":"range","default":0.35,"min":0,"max":1,"step":0.05,"section":"Water"},"caustics":{"editor":"boolean","default":true,"section":"Water"},"mask":{"editor":"boolean","default":true,"section":"Water"},"finger":{"editor":"range","default":9,"min":4,"max":20,"step":1,"unit":"px","section":"Sand"},"$preview":{"width":1440,"height":1240}}'>
+class Component extends DCLogic {
+  componentDidMount() {
+    this.parts = this.parts || [];
+    this.fit();
+    if (this.reducedMotion()) this.setState({ intro: false });
+    else this.startIntro();
+  }
+  reducedMotion() { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
+  startIntro() {
+    clearTimeout(this.introTimer);
+    this.introTimer = setTimeout(() => this.setState({ intro: false }), 3640);
+  }
+  skipIntro() { clearTimeout(this.introTimer); this.setState({ intro: false }); }
+  replayIntro() {
+    clearTimeout(this.introTimer);
+    if (this.reducedMotion()) return;
+    this.setState({ intro: false }, () => requestAnimationFrame(() => { this.setState({ intro: true }); this.startIntro(); }));
+  }
+  componentWillUnmount() {
+    clearTimeout(this.introTimer);
+    if (this.ro) this.ro.disconnect();
+    cancelAnimationFrame(this.raf);
+    cancelAnimationFrame(this.fadeRaf);
+  }
+  fit() {
+    const c = this.cv, l = this.live, r = this.root;
+    if (!c || !l || !r) return;
+    const w = r.clientWidth, h = r.clientHeight;
+    if (!w || !h) return;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const W = Math.round(w * dpr), H = Math.round(h * dpr);
+    if (c.width === W && c.height === H) return;
+    const keep = document.createElement('canvas');
+    keep.width = c.width; keep.height = c.height;
+    keep.getContext('2d').drawImage(c, 0, 0);
+    c.width = W; c.height = H; l.width = W; l.height = H;
+    const x = c.getContext('2d');
+    x.drawImage(keep, 0, 0);
+    x.setTransform(dpr, 0, 0, dpr, 0, 0);
+    l.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  pt(e) {
+    const b = this.cv.getBoundingClientRect();
+    return { x: e.clientX - b.left, y: e.clientY - b.top };
+  }
+  rad() { return Math.max(3, Math.min(24, Number(this.props.finger ?? 9))); }
+  onDown(e) {
+    if (!this.cv || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    e.preventDefault();
+    this.fit();
+    this.parts = this.parts || [];
+    this.drawing = true;
+    this.last = this.pt(e);
+    try { this.cv.setPointerCapture(e.pointerId); } catch (err) {}
+    this.dab(this.last, { x: 1, y: 0 });
+  }
+  onMove(e) {
+    if (!this.drawing) return;
+    const p = this.pt(e), q0 = this.last;
+    const dx = p.x - q0.x, dy = p.y - q0.y, d = Math.hypot(dx, dy);
+    if (d < 1.5) return;
+    const dir = { x: dx / d, y: dy / d }, n = Math.ceil(d / 2.5);
+    for (let i = 1; i <= n; i++) {
+      const q = { x: q0.x + dx * i / n, y: q0.y + dy * i / n };
+      this.dab(q, dir);
+      this.spawn(q, dir, d);
+    }
+    this.last = p;
+    if (!this.raf) this.raf = requestAnimationFrame(() => this.tick());
+  }
+  onUp() { this.drawing = false; }
+  circle(x, cx, cy, r) { x.beginPath(); x.arc(cx, cy, r, 0, Math.PI * 2); x.fill(); }
+  dab(q, dir) {
+    const x = this.cv.getContext('2d'), r = this.rad();
+    const nx = -dir.y, ny = dir.x;
+    for (const s of [-1, 1]) {
+      const cx = q.x + nx * s * (r + 3), cy = q.y + ny * s * (r + 3);
+      x.fillStyle = 'rgba(92,66,30,0.035)'; this.circle(x, cx + 2, cy + 2, r * 0.5);
+      x.fillStyle = 'rgba(255,243,212,0.075)'; this.circle(x, cx - 1, cy - 1, r * 0.5);
+    }
+    x.fillStyle = 'rgba(128,98,56,0.06)'; this.circle(x, q.x, q.y, r);
+    x.fillStyle = 'rgba(70,48,20,0.08)'; this.circle(x, q.x - r * 0.3, q.y - r * 0.3, r * 0.7);
+    x.fillStyle = 'rgba(255,244,214,0.07)'; this.circle(x, q.x + r * 0.4, q.y + r * 0.4, r * 0.45);
+  }
+  spawn(q, dir, speed) {
+    const r = this.rad(), nx = -dir.y, ny = dir.x;
+    const pal = ['#6f5530', '#8f7040', '#b08f58', '#cdb27c', '#e7d4a6', '#f6ead0', '#fff7e2', '#9a4f2b'];
+    const k = 1 + Math.floor(Math.random() * 3);
+    for (let i = 0; i < k; i++) {
+      const s = Math.random() < 0.5 ? -1 : 1;
+      const off = r * (0.3 + Math.random() * 0.7);
+      const push = 0.5 + Math.random() * 1.6 + Math.min(speed, 40) * 0.05;
+      this.parts.push({
+        x: q.x + nx * s * off + (Math.random() - 0.5) * 2,
+        y: q.y + ny * s * off + (Math.random() - 0.5) * 2,
+        vx: nx * s * push + dir.x * Math.random() * 1.2,
+        vy: ny * s * push + dir.y * Math.random() * 1.2,
+        c: pal[Math.floor(Math.random() * pal.length)],
+        z: 0.6 + Math.random() * 1.5
+      });
+    }
+    if (this.parts.length > 2500) this.bake(this.parts.splice(0, this.parts.length - 2500));
+  }
+  grain(x, p) {
+    x.fillStyle = 'rgba(60,40,14,0.28)'; this.circle(x, p.x + p.z * 0.45, p.y + p.z * 0.45, p.z * 0.6);
+    x.fillStyle = p.c; this.circle(x, p.x, p.y, p.z * 0.6);
+  }
+  bake(list) { const x = this.cv.getContext('2d'); for (const p of list) this.grain(x, p); }
+  tick() {
+    this.raf = 0;
+    const l = this.live;
+    if (!l || !this.cv) return;
+    const lx = l.getContext('2d');
+    lx.save(); lx.setTransform(1, 0, 0, 1, 0, 0); lx.clearRect(0, 0, l.width, l.height); lx.restore();
+    const still = [], moving = [];
+    for (const p of this.parts) {
+      p.x += p.vx; p.y += p.vy; p.vx *= 0.82; p.vy *= 0.82;
+      (Math.abs(p.vx) + Math.abs(p.vy) < 0.05 ? still : moving).push(p);
+    }
+    if (still.length) this.bake(still);
+    for (const p of moving) this.grain(lx, p);
+    this.parts = moving;
+    if (moving.length) this.raf = requestAnimationFrame(() => this.tick());
+  }
+  smooth() {
+    const c = this.cv, l = this.live;
+    if (!c) return;
+    this.parts = [];
+    if (l) { const lx = l.getContext('2d'); lx.save(); lx.setTransform(1, 0, 0, 1, 0, 0); lx.clearRect(0, 0, l.width, l.height); lx.restore(); }
+    cancelAnimationFrame(this.fadeRaf);
+    let n = 0;
+    const step = () => {
+      const x = c.getContext('2d');
+      x.save(); x.setTransform(1, 0, 0, 1, 0, 0);
+      n += 1;
+      if (n >= 28) x.clearRect(0, 0, c.width, c.height);
+      else { x.globalCompositeOperation = 'destination-out'; x.fillStyle = 'rgba(0,0,0,0.16)'; x.fillRect(0, 0, c.width, c.height); }
+      x.restore();
+      if (n < 28) this.fadeRaf = requestAnimationFrame(step);
+    };
+    step();
+  }
+  renderVals() {
+    if (!this.h) {
+      this.h = {
+        setRoot: (el) => {
+          this.root = el;
+          if (el && window.ResizeObserver && !this.ro) { this.ro = new ResizeObserver(() => this.fit()); this.ro.observe(el); }
+        },
+        setCv: (el) => { this.cv = el; },
+        setLive: (el) => { this.live = el; },
+        down: (e) => this.onDown(e),
+        move: (e) => this.onMove(e),
+        up: () => this.onUp(),
+        smooth: () => this.smooth(),
+        skipIntro: () => this.skipIntro(),
+        replayIntro: () => this.replayIntro()
+      };
+    }
+    const d = Math.max(0, Math.min(1, this.props.depth ?? 0.35));
+    const a = (0.08 + d * 0.42).toFixed(3);
+    return Object.assign({
+      intro: !(this.state && this.state.intro === false),
+      tint: 'rgba(60, 170, 185, ' + a + ')',
+      caustics: this.props.caustics ?? true,
+      mask: this.props.mask ?? true
+    }, this.h);
+  }
+}
+</script>
+</body>
+</html>

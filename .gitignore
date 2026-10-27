@@ -1,0 +1,10 @@
+# Speech models and local recordings stay out of git
+sherpa-onnx-whisper-*/
+*.tar.bz2
+recordings/
+*.webm
+*.mp4
+*.mov
+*.m4a
+__pycache__/
+.DS_Store
